@@ -55,7 +55,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private static void SelectVehicles(double left, double top, double right, double bottom)
         {
-            var move = new Move
+            var move = new Action
             {
                 Action = ActionType.ClearAndSelect,
                 Left = left,
@@ -63,12 +63,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Right = right,
                 Bottom = bottom
             };
-            Global.ActionQueue.Enqueue(move);
+            Global.ActionQueue.Add(move);
         }
 
         private static void AssignVehicles(int groupIndex)
         {
-            Global.ActionQueue.Enqueue(new Move
+            Global.ActionQueue.Add(new Action
             {
                 Action = ActionType.Assign,
                 Group = groupIndex

@@ -13,7 +13,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 SelectionTest();
 
-                ActionQueueProcessor.ProcessQueue();
+                Global.ActionQueue.Process();
             }
             catch (Exception ex)
             {

@@ -17,6 +17,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public Point MassCenter { get; set; }
 
+        public int WaitUntilIndex { get; set; }
+
+        public Func<bool> BusyChecker { get; set; }
+
+        public bool Busy => BusyChecker != null && BusyChecker();
+
         public double Density
         {
             get
@@ -70,7 +76,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public Formation()
         {
+            WaitUntilIndex = -1;
             Vehicles = new Dictionary<long, VehicleWrapper>();
+            BusyChecker = () => !IsStanding && Global.World.TickIndex > WaitUntilIndex;
         }
 
         public void Update(IEnumerable<VehicleUpdate> updates = null)
@@ -103,38 +111,38 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public void Shift(double x, double y, double maxSpeed = 10)
         {
-            var move = new Move
+            var move = new Action(this)
             {
                 Action = ActionType.Move,
                 X = x,
                 Y = y,
                 MaxSpeed = maxSpeed
             };
-            Global.ActionQueue.Enqueue(move);
+            Global.ActionQueue.Add(move);
         }
 
 
         public void ScaleLeftTop(double factor)
         {
-            var move = new Move
+            var move = new Action(this)
             {
                 Action = ActionType.Scale,
                 Factor = factor,
                 X = Rectangle.Left,
                 Y = Rectangle.Top
             };
-            Global.ActionQueue.Enqueue(move);
+            Global.ActionQueue.Add(move);
         }
 
 
         public void Select()
         {
-            Global.ActionQueue.Enqueue(GetSelectionAction());
+            Global.ActionQueue.Add(GetSelectionAction());
         }
 
-        public Move GetSelectionAction()
+        public Action GetSelectionAction()
         {
-            var move = new Move {Action = ActionType.ClearAndSelect};
+            var move = new Action (this){ Action = ActionType.ClearAndSelect};
             if (GroupIndex > 0)
             {
                 move.Group = GroupIndex;

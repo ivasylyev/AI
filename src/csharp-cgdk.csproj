@@ -72,7 +72,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionQueueProcessor.cs" />
+    <Compile Include="Action.cs" />
+    <Compile Include="ActionQueue.cs" />
     <Compile Include="Formation.cs" />
     <Compile Include="FormationFactory.cs" />
     <Compile Include="Global.cs" />

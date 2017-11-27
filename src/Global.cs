@@ -11,6 +11,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static Game Game;
         public static Move Move;
 
+
+        public static Formation SelectedFormation;
+
         public static readonly Dictionary<long, VehicleWrapper> AllVehicles = new Dictionary<long, VehicleWrapper>();
         public static readonly Dictionary<long, VehicleWrapper> MyVehicles = new Dictionary<long, VehicleWrapper>();
         public static readonly Dictionary<long, VehicleWrapper> EnemyVehicles = new Dictionary<long, VehicleWrapper>();
@@ -18,7 +21,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static readonly Dictionary<long, Formation> Formations = new Dictionary<long, Formation>();
 
 
-        public static readonly Queue<Move> ActionQueue = new Queue<Move>();
+        public static readonly ActionQueue ActionQueue = new ActionQueue(); 
 
         public static double factor = 1.5;
         public static double betweenSquares = 74;
