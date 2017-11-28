@@ -15,10 +15,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public double Right => RightBottom.X;
         public double Bottom => RightBottom.Y;
 
-        /// <summary>
-        /// Центр прямоугольника
-        /// </summary>
-        public Point Center => new Point((Right + Left)/2, (Bottom + Top)/2);
+
+        public Point Center => new Point((Right + Left) / 2, (Bottom + Top) / 2);
+        public double SqrDiameter => (Right - Left) * (Right - Left) + (Bottom - Top) * (Bottom - Top);
 
         public Rect(double left, double top, double right, double bottom)
         {

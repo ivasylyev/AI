@@ -22,7 +22,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        private bool _isFightersSplitted;
+        
         private bool _isFightersScaled;
 
         private void SelectionTest()
@@ -30,7 +30,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex == 1)
             {
                 var fighters = Global.Formations[-(int) VehicleType.Fighter];
-                fighters.MoveLeftTopTo(300, 300);
+                fighters.MoveLeftTopTo(200, 200);
             }
 
             if (Global.World.TickIndex % 60 == 0)
@@ -38,18 +38,31 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 var fighters = Global.Formations[-(int) VehicleType.Fighter];
                 if (!fighters.Busy && !fighters.Children.Any())
                 {
-                    fighters.Split(100);
-                    _isFightersSplitted = true;
+                    fighters.Split(50);
                 }
                 if (!_isFightersScaled)
                 {
-                    if (fighters.Children.All(c => c.Alive && !c.Busy))
+                    if (fighters.Children.Count == 4 && fighters.Children.All(c => c.Alive && !c.Busy))
                     {
-                        foreach (var child in fighters.Children)
-                        {
-                            child.ScaleLeftTop(3);
-                        }
+                        fighters.Children[2].Shift(100, 100);
+                        fighters.Children[3].Shift(-100, 100);
                         _isFightersScaled = true;
+                    }
+                }
+            }
+            if (Global.World.TickIndex % 10 == 0)
+            {
+                foreach (var key1 in Global.Formations.Keys)
+                {
+                    foreach (var key2 in Global.Formations.Keys.Where(k=>k!=key1))
+                    {
+                        var f1 = Global.Formations[key1];
+                        var f2 = Global.Formations[key2];
+                        var distBetweenCenters = f1.Rectangle.Center.SqrDistance(f2.Rectangle.Center);
+                        if (distBetweenCenters < (f1.Rectangle.SqrDiameter + f1.Rectangle.SqrDiameter) / 2)
+                        {
+                            
+                        }
                     }
                 }
             }

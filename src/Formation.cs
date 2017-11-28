@@ -129,6 +129,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 child.Shift(-runFromCenter, runFromCenter);
             }
             child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rectangle.Right, Rectangle.Bottom);
+            Children.Add(child);
             if (runFromCenter > 0)
             {
                 child.Shift(runFromCenter, runFromCenter);
@@ -150,11 +151,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public void Shift(double x, double y, double maxSpeed = 10)
         {
             Select();
+            var actualX = MassCenter.X;
+            var actualY = MassCenter.Y;
             var move = new Action(this)
             {
                 Action = ActionType.Move,
                 X = x,
                 Y = y,
+                GetDeltaX = () => MassCenter.X - actualX,
+                GetDeltaY = () => MassCenter.Y - actualY,
                 MaxSpeed = maxSpeed
             };
             Global.ActionQueue.Add(move);
@@ -163,12 +168,16 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public void ScaleLeftTop(double factor)
         {
             Select();
+            var actualX = MassCenter.X;
+            var actualY = MassCenter.Y;
             var move = new Action(this)
             {
                 Action = ActionType.Scale,
                 Factor = factor,
                 X = Rectangle.Left,
-                Y = Rectangle.Top
+                Y = Rectangle.Top,
+                GetDeltaX = () => MassCenter.X - actualX,
+                GetDeltaY = () => MassCenter.Y - actualY,
             };
             Global.ActionQueue.Add(move);
         }

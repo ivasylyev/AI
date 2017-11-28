@@ -79,8 +79,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 else
                 {
                     move.Action = action.Action;
-                    move.X = action.X;
-                    move.Y = action.Y;
+                    move.X = action.X + action.GetDeltaX();
+                    move.Y = action.Y + action.GetDeltaY();
                     move.Group = action.Group;
                     move.Angle = action.Angle;
                     move.Left = action.Left;

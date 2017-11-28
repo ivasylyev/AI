@@ -23,6 +23,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public int WaitForWorldTick;
 
         public Func<bool> Condition;
+        public Func<double> GetDeltaX = () => 0;
+        public Func<double> GetDeltaY = () => 0;
 
         public System.Action Callback;
 
