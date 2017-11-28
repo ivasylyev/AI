@@ -104,16 +104,19 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public void MoveCenterTo(double x, double y, double maxSpeed = 10)
         {
+            Select();
             Shift(x - Rectangle.Center.X, y - Rectangle.Center.Y);
         }
 
         public void MoveLeftTopTo(double x, double y, double maxSpeed = 10)
         {
+            Select();
             Shift(x - Rectangle.Left, y - Rectangle.Top);
         }
 
         public void Shift(double x, double y, double maxSpeed = 10)
         {
+            Select();
             var move = new Action(this)
             {
                 Action = ActionType.Move,
@@ -124,9 +127,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Global.ActionQueue.Add(move);
         }
 
-
         public void ScaleLeftTop(double factor)
         {
+            Select();
             var move = new Action(this)
             {
                 Action = ActionType.Scale,
@@ -138,9 +141,13 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
 
-        public void Select()
+        private void Select()
         {
-            Global.ActionQueue.Add(GetSelectionAction());
+            if (Global.SelectedFormation != this)
+            {
+                Global.SelectedFormation = this;
+                Global.ActionQueue.Add(GetSelectionAction());
+            }
         }
 
         public Action GetSelectionAction()
