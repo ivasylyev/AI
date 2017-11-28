@@ -31,5 +31,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public int MinimumDuration;
 
         public bool Ready => Condition == null || Condition();
+        public override string ToString()
+        {
+            return $"{Action} Rect:({Left};{Top}  {Right};{Bottom}), XY:({X};{Y}), Group:{Group}";
+        }
     }
 }

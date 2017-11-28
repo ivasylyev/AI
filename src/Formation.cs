@@ -22,6 +22,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public Func<bool> BusyChecker { get; set; }
 
         public bool Busy => BusyChecker != null && BusyChecker();
+        public bool Alive { get; set; }
 
         public double Density
         {
@@ -31,9 +32,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     return 0;
                 }
-                var radius = Rectangle.Center.Distance(Vehicles.Values.OrderBy(i => Rectangle.Center.Distance(i)).Last());
-                var sq = Math.PI*radius*radius;
-                return Vehicles.Count/sq;
+                var radius =
+                    Rectangle.Center.Distance(Vehicles.Values.OrderBy(i => Rectangle.Center.Distance(i)).Last());
+                var sq = Math.PI * radius * radius;
+                return Vehicles.Count / sq;
             }
         }
 
@@ -68,15 +70,16 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public bool IsNear()
         {
             var near = Global.EnemyVehicles.Values
-                             .Count(
-                                 enemy => Global.MyVehicles.Values.Where(v => v.Type != VehicleType.Fighter)
-                                                .Any(i => i.SqrDistance(enemy) < i.VisionRange * i.VisionRange));
+                .Count(
+                    enemy => Global.MyVehicles.Values.Where(v => v.Type != VehicleType.Fighter)
+                        .Any(i => i.SqrDistance(enemy) < i.VisionRange * i.VisionRange));
             return near > 20;
         }
 
         public Formation()
         {
             WaitUntilIndex = -1;
+            Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
             BusyChecker = () => !IsStanding && Global.World.TickIndex > WaitUntilIndex;
         }
@@ -95,8 +98,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
             Rectangle = new Rect(Vehicles.Values);
             MassCenter = Vehicles.Any()
-                             ? new Point(Vehicles.Values.Average(i => i.X), Vehicles.Values.Average(i => i.Y))
-                             : Point.Zero;
+                ? new Point(Vehicles.Values.Average(i => i.X), Vehicles.Values.Average(i => i.Y))
+                : Point.Zero;
         }
 
         public void MoveCenterTo(double x, double y, double maxSpeed = 10)
@@ -142,7 +145,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public Action GetSelectionAction()
         {
-            var move = new Action (this){ Action = ActionType.ClearAndSelect};
+            var move = new Action(this) {Action = ActionType.ClearAndSelect};
             if (GroupIndex > 0)
             {
                 move.Group = GroupIndex;

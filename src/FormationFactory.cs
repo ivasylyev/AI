@@ -45,15 +45,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             formation.Update();
 
-            SelectVehicles(left, top, right, bottom);
-            AssignVehicles(groupIndex);
+            SelectVehicles(formation, left, top, right, bottom);
+            AssignVehicles(formation, groupIndex);
 
             Global.Formations.Add(formation.GroupIndex, formation);
 
             return formation;
         }
 
-        private static void SelectVehicles(double left, double top, double right, double bottom)
+        private static void SelectVehicles(Formation formation, double left, double top, double right, double bottom)
         {
             var move = new Action
             {
@@ -66,12 +66,13 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Global.ActionQueue.Add(move);
         }
 
-        private static void AssignVehicles(int groupIndex)
+        private static void AssignVehicles(Formation formation, int groupIndex)
         {
             Global.ActionQueue.Add(new Action
             {
                 Action = ActionType.Assign,
-                Group = groupIndex
+                Group = groupIndex,
+                Callback = () => { formation.Alive = true; }
             });
         }
     }
