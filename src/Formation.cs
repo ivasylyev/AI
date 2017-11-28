@@ -76,11 +76,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return near > 20;
         }
 
+        public readonly List<Formation> Children;
+
         public Formation()
         {
             WaitUntilIndex = -1;
             Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
+            Children = new List<Formation>();
             BusyChecker = () => !IsStanding && Global.World.TickIndex > WaitUntilIndex;
         }
 
@@ -100,6 +103,36 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             MassCenter = Vehicles.Any()
                 ? new Point(Vehicles.Values.Average(i => i.X), Vehicles.Values.Average(i => i.Y))
                 : Point.Zero;
+        }
+
+
+        public void Split(int runFromCenter = 0)
+        {
+            var child = FormationFactory.CreateFormation(Rectangle.Left, Rectangle.Top, MassCenter.X, MassCenter.Y);
+            Children.Add(child);
+            if (runFromCenter > 0)
+            {
+                child.Shift(-runFromCenter, -runFromCenter);
+            }
+
+            child = FormationFactory.CreateFormation(MassCenter.X, Rectangle.Top, Rectangle.Right, MassCenter.Y);
+            Children.Add(child);
+            if (runFromCenter > 0)
+            {
+                child.Shift(runFromCenter, -runFromCenter);
+            }
+
+            child = FormationFactory.CreateFormation(Rectangle.Left, MassCenter.Y, MassCenter.X, Rectangle.Bottom);
+            Children.Add(child);
+            if (runFromCenter > 0)
+            {
+                child.Shift(-runFromCenter, runFromCenter);
+            }
+            child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rectangle.Right, Rectangle.Bottom);
+            if (runFromCenter > 0)
+            {
+                child.Shift(runFromCenter, runFromCenter);
+            }
         }
 
         public void MoveCenterTo(double x, double y, double maxSpeed = 10)
@@ -139,7 +172,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             };
             Global.ActionQueue.Add(move);
         }
-
 
         private void Select()
         {

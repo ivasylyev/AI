@@ -1,4 +1,5 @@
-﻿using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
+﻿using System.Linq;
+using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
@@ -23,14 +24,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             formation.Update();
 
             Global.Formations.Add(formation.GroupIndex, formation);
+            formation.Alive = true;
             return formation;
         }
 
-        public static Formation CreateFormation(double left, double top, double right, double bottom, int groupIndex)
+        public static Formation CreateFormation(double left, double top, double right, double bottom)
         {
             var formation = new Formation
             {
-                GroupIndex = groupIndex
+                GroupIndex = GetFreeFormationIndex()
             };
 
             var rect = new Rect(left, top, right, bottom);
@@ -46,7 +48,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             formation.Update();
 
             SelectVehicles(formation, left, top, right, bottom);
-            AssignVehicles(formation, groupIndex);
+            AssignVehicles(formation, formation.GroupIndex);
 
             Global.Formations.Add(formation.GroupIndex, formation);
 
@@ -74,6 +76,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Group = groupIndex,
                 Callback = () => { formation.Alive = true; }
             });
+        }
+
+        public static int GetFreeFormationIndex()
+        {
+            return Enumerable.Range(1, 100).Except(Global.Formations.Keys).FirstOrDefault();
         }
     }
 }

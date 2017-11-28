@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -18,9 +19,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static readonly Dictionary<long, VehicleWrapper> MyVehicles = new Dictionary<long, VehicleWrapper>();
         public static readonly Dictionary<long, VehicleWrapper> EnemyVehicles = new Dictionary<long, VehicleWrapper>();
 
-        public static readonly Dictionary<long, Formation> Formations = new Dictionary<long, Formation>();
+        public static readonly Dictionary<int, Formation> Formations = new Dictionary<int, Formation>();
 
-
+        
         public static readonly ActionQueue ActionQueue = new ActionQueue(); 
 
         public static double factor = 1.5;
