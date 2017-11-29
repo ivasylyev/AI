@@ -16,13 +16,16 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             Formation = formation;
             MinimumDuration = minimumDuration;
+            FinishCondition = () => !Formation.Busy;
+            StartCondition = () => !Formation.Busy && Formation.Vehicles.Count > 0;
         }
 
         public bool Urgent { get; set; }
         public int WaitForWorldTick { get; set; }
         public ActionStatus Status { get; set; }
 
-        public Func<bool> Condition;
+        public Func<bool> StartCondition;
+        public Func<bool> FinishCondition;
         public Func<double> GetDeltaX = () => 0;
         public Func<double> GetDeltaY = () => 0;
 
@@ -32,7 +35,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public int MinimumDuration { get; set; }
 
-        public bool Ready => Condition == null || Condition();
+        public bool ReadyToStart => StartCondition == null || StartCondition();
+        public bool ReadyToFinish => FinishCondition == null || FinishCondition();
 
         public override string ToString()
         {

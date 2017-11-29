@@ -15,7 +15,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             _internalQueue.Add(actions);
 
             foreach (var action in actions)
+            {
                 action.Status = ActionStatus.Pending;
+            }
         }
 
 
@@ -31,11 +33,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
         }
 
+        public void Update()
+        {
+            foreach (var sequence in _internalQueue)
+            {
+                var executingAction = sequence.GetExecutingAction();
+                if (executingAction != null)
+                {
+                    if (executingAction.ReadyToFinish)
+                        executingAction.Status = ActionStatus.Finished;
+                }
+            }
+        }
+
         public void Process()
         {
             if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
             {
-                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.Ready);
+                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.ReadyToStart);
                 if (sequence != null)
                 {
                     var action = sequence.GetPendingAction();
@@ -45,8 +60,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 if (Global.World.TickIndex >= _wait)
                 {
-                    sequence = _internalQueue.FirstOrDefault(s =>
-                        s.Ready && s.Any(a=>a.Formation == null || !a.Formation.Busy && a.Formation.Vehicles.Count > 0));
+                    sequence = _internalQueue.FirstOrDefault(s =>s.ReadyToStart);
                     if (sequence != null)
                     {
                         _wait = -1;
@@ -67,7 +81,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void Execute(ActionSequence sequence, Action action, Move move)
         {
-            if (action == null) return;
+            if (action == null)
+            {
+                return;
+            }
 
             try
             {
@@ -78,8 +95,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 else
                 {
                     move.Action = action.Action;
-                    move.X = action.X + action.GetDeltaX();
-                    move.Y = action.Y + action.GetDeltaY();
+                    move.X = action.X - action.GetDeltaX();
+                    move.Y = action.Y - action.GetDeltaY();
                     move.Group = action.Group;
                     move.Angle = action.Angle;
                     move.Left = action.Left;
@@ -97,7 +114,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     {
                         action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
                         if (action.Action == ActionType.ClearAndSelect)
+                        {
                             Global.SelectedFormation = action.Formation;
+                        }
                     }
                 }
 
@@ -108,7 +127,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             finally
             {
                 if (!sequence.Any() || sequence.All(a => a.Status == ActionStatus.Finished))
+                {
                     _internalQueue.Remove(sequence);
+                }
             }
         }
     }

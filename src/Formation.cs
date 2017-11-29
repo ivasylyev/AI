@@ -15,7 +15,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
             Children = new List<Formation>();
-            BusyChecker = () => !IsStanding && Global.World.TickIndex > WaitUntilIndex;
+            BusyCondition = () => Global.World.TickIndex < WaitUntilIndex || !IsStanding  ;
         }
 
         public VehicleType Type { get; set; }
@@ -30,9 +30,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public int WaitUntilIndex { get; set; }
 
-        public Func<bool> BusyChecker { get; set; }
+        public Func<bool> BusyCondition { get; set; }
 
-        public bool Busy => BusyChecker != null && BusyChecker();
+        public bool Busy => BusyCondition != null && BusyCondition();
         public bool Alive { get; set; }
 
         public double Density
@@ -117,6 +117,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
 
             child = FormationFactory.CreateFormation(MassCenter.X, Rectangle.Top, Rectangle.Right, MassCenter.Y);
+            sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
@@ -124,12 +125,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
 
             child = FormationFactory.CreateFormation(Rectangle.Left, MassCenter.Y, MassCenter.X, Rectangle.Bottom);
+            sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
                 sequence.Add(child.Formation.GetShiftAction(-runFromCenter, runFromCenter));
             }
             child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rectangle.Right, Rectangle.Bottom);
+            sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {

@@ -5,6 +5,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public class ActionSequence : List<Action>
     {
+        public ActionSequence(params Action[] action)
+        {
+            AddRange(action);
+        }
+
         public bool Urgent
         {
             get
@@ -12,20 +17,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 var pendingAction = GetPendingAction();
                 var executingAction = GetExecutingAction();
                 if (pendingAction == null || executingAction != null)
+                {
                     return false;
+                }
                 return pendingAction.Urgent;
             }
         }
 
-        public bool Ready
+        public bool ReadyToStart
         {
             get
             {
                 var pendingAction = GetPendingAction();
                 var executingAction = GetExecutingAction();
                 if (pendingAction == null || executingAction != null)
+                {
                     return false;
-                return pendingAction.Ready;
+                }
+                return pendingAction.ReadyToStart;
             }
         }
 
@@ -34,19 +43,26 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             get
             {
                 if (!this.Any() || this.All(a => a.Status == ActionStatus.Finished))
+                {
                     return ActionStatus.Finished;
+                }
                 if (this.Any(a => a.Status == ActionStatus.Executing))
+                {
                     return ActionStatus.Executing;
+                }
                 if (this.Any(a => a.Status == ActionStatus.Pending))
+                {
                     return ActionStatus.Pending;
+                }
                 return ActionStatus.Undefined;
             }
         }
 
-        public ActionSequence(params Action[] action)
+        public void Add(ActionSequence sequence)
         {
-            AddRange(action);
+            AddRange(sequence);
         }
+
 
         public Action GetExecutingAction()
         {

@@ -13,6 +13,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             UpdateVehicles();
 
             UpdateFormations();
+
+            Global.ActionQueue.Update();
         }
 
         private static void InitGlobal(Player me, World world, Game game, Move move)
