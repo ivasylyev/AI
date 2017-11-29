@@ -74,8 +74,11 @@
   <ItemGroup>
     <Compile Include="Action.cs" />
     <Compile Include="ActionQueue.cs" />
+    <Compile Include="ActionSequence.cs" />
+    <Compile Include="ActionStatus.cs" />
     <Compile Include="Formation.cs" />
     <Compile Include="FormationFactory.cs" />
+    <Compile Include="FormationResult.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Model\ActionType.cs" />

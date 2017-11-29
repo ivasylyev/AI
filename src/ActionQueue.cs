@@ -7,66 +7,65 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public class ActionQueue
     {
-        private readonly List<Action> _internalQueue = new List<Action>();
-
         private static int _wait = -1;
+        private readonly List<ActionSequence> _internalQueue = new List<ActionSequence>();
 
-        public void Add(Action action)
+        public void Add(ActionSequence actions)
         {
-            _internalQueue.Add(action);
+            _internalQueue.Add(actions);
+
+            foreach (var action in actions)
+                action.Status = ActionStatus.Pending;
         }
 
 
         public int WaitTicks(int ticks)
         {
             var action = new Action {WaitForWorldTick = Global.World.TickIndex + ticks};
-            Add(action);
+            Add(new ActionSequence(action));
             return action.WaitForWorldTick;
         }
 
         public bool HasActionsFor(Formation formation)
         {
-            return _internalQueue.Any(a => a.Formation == formation);
+            return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
         }
 
         public void Process()
         {
-            // Если в очереди етсь приказы и мы имеем право действовать
             if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
             {
-                // Если существуют срочные приказы они выполняются без задержек
-                var action = _internalQueue.FirstOrDefault(i => i.Urgent && i.Ready);
-                if (action != null)
+                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.Ready);
+                if (sequence != null)
                 {
-                    Execute(action, Global.Move);
+                    var action = sequence.GetPendingAction();
+                    Execute(sequence, action, Global.Move);
                     return;
                 }
 
-                // Если метка ожидания пройдена 
                 if (Global.World.TickIndex >= _wait)
                 {
-                    // Ищется готовое действие заданное не для группы либо для непустой группы готовой действовать
-                    action = _internalQueue.FirstOrDefault(i =>
-                        (i.Ready && (i.Formation == null || (!i.Formation.Busy && i.Formation.Vehicles.Count > 0))));
-                    if (action != null)
+                    sequence = _internalQueue.FirstOrDefault(s =>
+                        s.Ready && s.Any(a=>a.Formation == null || !a.Formation.Busy && a.Formation.Vehicles.Count > 0));
+                    if (sequence != null)
                     {
                         _wait = -1;
 
-                        // Если текущая выделенная формация не совпадает с той для которой выполняется действие,
-                        // то надо вместо заданного приказа выполнить приказ на выделение
+                        var action = sequence.GetPendingAction();
                         if (action.Formation != null && Global.SelectedFormation != action.Formation)
                         {
                             Global.SelectedFormation = action.Formation;
+
                             action = action.Formation.GetSelectionAction();
                         }
-                        Execute(action, Global.Move);
+                        Execute(sequence, action, Global.Move);
                     }
                 }
             }
         }
 
 
-        private void Execute(Action action, Move move)
+        private void Execute(ActionSequence sequence, Action action, Move move)
         {
             if (action == null) return;
 
@@ -94,7 +93,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     move.FacilityId = action.FacilityId;
                     move.VehicleId = action.VehicleId;
 
-                    // Если приказ пришел от группы, то надо сдвинуть таймер группы на заданное число тиков
                     if (action.Formation != null)
                     {
                         action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
@@ -103,12 +101,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     }
                 }
 
+                action.Status = ActionStatus.Executing;
                 action.Callback?.Invoke();
                 Console.WriteLine($"Action:{action}");
             }
             finally
             {
-                _internalQueue.Remove(action);
+                if (!sequence.Any() || sequence.All(a => a.Status == ActionStatus.Finished))
+                    _internalQueue.Remove(sequence);
             }
         }
     }

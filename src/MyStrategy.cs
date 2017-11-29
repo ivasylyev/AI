@@ -24,7 +24,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         
         private bool _isFightersScaled;
-
+        private int count;
         private void SelectionTest()
         {
             if (Global.World.TickIndex == 1)
@@ -36,19 +36,27 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex % 60 == 0)
             {
                 var fighters = Global.Formations[-(int) VehicleType.Fighter];
+                /*
+                 * split and shift in different ways
                 if (!fighters.Busy && !fighters.Children.Any())
                 {
                     fighters.Split(50);
+                    count = 0;
                 }
                 if (!_isFightersScaled)
                 {
-                    if (fighters.Children.Count == 4 && fighters.Children.All(c => c.Alive && !c.Busy))
+                    
+                    if (fighters.Children.Count == 4 && count ==1)
                     {
                         fighters.Children[2].Shift(100, 100);
                         fighters.Children[3].Shift(-100, 100);
                         _isFightersScaled = true;
                     }
+                    count++;
+
+                
                 }
+                */
             }
             if (Global.World.TickIndex % 10 == 0)
             {

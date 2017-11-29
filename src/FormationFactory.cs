@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -28,7 +29,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return formation;
         }
 
-        public static Formation CreateFormation(double left, double top, double right, double bottom)
+        public static FormationResult CreateFormation(double left, double top, double right, double bottom)
         {
             var formation = new Formation
             {
@@ -47,17 +48,23 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             formation.Update();
 
-            SelectVehicles(formation, left, top, right, bottom);
-            AssignVehicles(formation, formation.GroupIndex);
+            var list = SelectAndAssignVehicles(formation, left, top, right, bottom, formation.GroupIndex);
 
             Global.Formations.Add(formation.GroupIndex, formation);
 
-            return formation;
+            return new FormationResult
+            {
+                Formation = formation,
+                GroupIndex = formation.GroupIndex,
+                ActionList = list
+            };
         }
 
-        private static void SelectVehicles(Formation formation, double left, double top, double right, double bottom)
+        private static List<Action> SelectAndAssignVehicles(Formation formation, double left, double top,
+            double right,
+            double bottom, int groupIndex)
         {
-            var move = new Action
+            var selectAction = new Action
             {
                 Action = ActionType.ClearAndSelect,
                 Left = left,
@@ -65,18 +72,21 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Right = right,
                 Bottom = bottom
             };
-            Global.ActionQueue.Add(move);
-        }
-
-        private static void AssignVehicles(Formation formation, int groupIndex)
-        {
-            Global.ActionQueue.Add(new Action
+            selectAction.Callback = () => { selectAction.Status = ActionStatus.Finished; };
+            var assignAction = new Action
             {
                 Action = ActionType.Assign,
-                Group = groupIndex,
-                Callback = () => { formation.Alive = true; }
-            });
+                Group = groupIndex
+            };
+            assignAction.Callback = () =>
+            {
+                formation.Alive = true;
+                assignAction.Status = ActionStatus.Finished;
+            };
+
+            return new List<Action> {selectAction, assignAction};
         }
+
 
         public static int GetFreeFormationIndex()
         {

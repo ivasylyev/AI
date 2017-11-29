@@ -18,9 +18,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             MinimumDuration = minimumDuration;
         }
 
-        public bool Urgent;
-
-        public int WaitForWorldTick;
+        public bool Urgent { get; set; }
+        public int WaitForWorldTick { get; set; }
+        public ActionStatus Status { get; set; }
 
         public Func<bool> Condition;
         public Func<double> GetDeltaX = () => 0;
@@ -28,14 +28,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public System.Action Callback;
 
-        public Formation Formation;
+        public Formation Formation { get; set; }
 
-        public int MinimumDuration;
+        public int MinimumDuration { get; set; }
 
         public bool Ready => Condition == null || Condition();
+
         public override string ToString()
         {
-            return $"{Action} Rect:({Left};{Top}  {Right};{Bottom}), XY:({X};{Y}), Group:{Group}";
+            return $"{Action} Rect:({Left};{Top}  {Right};{Bottom}), XY:({X};{Y}), Group:{Group} Status:{Status}";
         }
     }
 }
