@@ -31,14 +31,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             const double nearCoordinate = 80D;
             const double farCoordinate = 200D;
             const double factor = 1.5D;
-            
+
 
             if (Global.World.TickIndex == 1)
             {
                 var fighters = Global.Formations[-(int) VehicleType.Fighter];
                 var helicopters = Global.Formations[-(int) VehicleType.Helicopter];
 
-                var isLeftTheSame = Math.Abs(fighters.Rectangle.Left - helicopters.Rectangle.Left) < eps;
+                var isVertical = Math.Abs(fighters.Rectangle.Left - helicopters.Rectangle.Left) < eps;
 
                 Formation f1;
                 Formation f2;
@@ -48,117 +48,82 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 double f2MoveY;
                 double shiftX;
                 double shiftY;
-                if (isLeftTheSame)
+
+                if (isVertical)
                 {
-                    if (fighters.Rectangle.Top < helicopters.Rectangle.Top)
-                    {
-                        f1 = fighters;
-                        f2 = helicopters;
-                    }
-                    else
-                    {
-                        f1 = helicopters;
-                        f2 = fighters;
-                    }
                     f1MoveX = commonCoordinate + deltaShift;
                     f1MoveY = nearCoordinate;
                     f2MoveX = commonCoordinate;
                     f2MoveY = farCoordinate;
                     shiftX = 0;
                     shiftY = (farCoordinate - nearCoordinate) / 2;
-                    
-                    var sMove1 = new ActionSequence(
-                        f1.MoveLeftTopTo(f1MoveX, f1MoveY, Global.Game.HelicopterSpeed),
-                        f1.ScaleLeftTop(factor)
-                    );
-                    Global.ActionQueue.Add(sMove1);
-                    var sMove2 = new ActionSequence(
-                        f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
-                        f2.ScaleLeftTop(factor)
-                    );
-                    Global.ActionQueue.Add(sMove2);
-
-
-                    var aPenetrate1 = f1.ShiftTo(shiftX, shiftY);
-                    aPenetrate1.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
-                    var sPenetrate1 = new ActionSequence(aPenetrate1);
-                    Global.ActionQueue.Add(sPenetrate1);
-
-                    var aPenetrate2 = f2.ShiftTo(-shiftX, -shiftY);
-                    aPenetrate2.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
-                    var sPenetrate2 = new ActionSequence(aPenetrate2);
-                    Global.ActionQueue.Add(sPenetrate2);
-
-                    var fTrunc = FormationFactory.CreateFormation(f1.Rectangle.Left, f1.Rectangle.Top,
-                        f1.Rectangle.Right, f1.Rectangle.Bottom - 4);
-
-
-                    var sCompact = new ActionSequence(fTrunc.ActionList.ToArray());
-                    sCompact.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
-                    foreach (var action in sCompact)
-                    {
-                        action.Urgent = true;
-                    }
-                    sCompact.Add(fTrunc.Formation.ShiftTo(shiftX, shiftY));
-                    Global.ActionQueue.Add(sCompact);
                 }
+
                 else
                 {
-                    if (fighters.Rectangle.Left < helicopters.Rectangle.Left)
-                    {
-                        f1 = fighters;
-                        f2 = helicopters;
-                    }
-                    else
-                    {
-                        f1 = helicopters;
-                        f2 = fighters;
-                    }
                     f1MoveX = nearCoordinate;
                     f1MoveY = commonCoordinate + deltaShift;
                     f2MoveX = farCoordinate;
                     f2MoveY = commonCoordinate;
                     shiftX = (farCoordinate - nearCoordinate) / 2;
                     shiftY = 0;
-                    var sMove1 = new ActionSequence(
-                        f1.MoveLeftTopTo(f1MoveX, f1MoveY,Global.Game.HelicopterSpeed),
-                        f1.ScaleLeftTop(factor)
-                    );
-                    Global.ActionQueue.Add(sMove1);
-                    
-                    var sMove2 = new ActionSequence(
-                        f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
-                        f2.ScaleLeftTop(factor)
-                    );
-                    Global.ActionQueue.Add(sMove2);
-
-                    var aPenetrate1 = f1.ShiftTo(shiftX, shiftY);
-                    aPenetrate1.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
-
-                    var sPenetrate1 = new ActionSequence(aPenetrate1);
-                    Global.ActionQueue.Add(sPenetrate1);
-
-                    var aPenetrate2 = f2.ShiftTo(-shiftX, -shiftY);
-                    aPenetrate2.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
-
-                    var sPenetrate2 = new ActionSequence(aPenetrate2);
-                    Global.ActionQueue.Add(sPenetrate2);
-
-                    var fTrunc = FormationFactory.CreateFormation(f1.Rectangle.Left, f1.Rectangle.Top,
-                        f1.Rectangle.Right - 4, f1.Rectangle.Bottom);
-
-                    var sCompact = new ActionSequence(fTrunc.ActionList.ToArray());
-                    sCompact.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
-                    foreach (var action in sCompact)
-                    {
-                        action.Urgent = true;
-                    }
-                    sCompact.Add(fTrunc.Formation.ShiftTo(shiftX, shiftY));
-                    Global.ActionQueue.Add(sCompact);
                 }
+                if (isVertical && fighters.Rectangle.Top < helicopters.Rectangle.Top ||
+                    !isVertical && fighters.Rectangle.Left < helicopters.Rectangle.Left)
+                {
+                    f1 = fighters;
+                    f2 = helicopters;
+                }
+                else
+                {
+                    f1 = helicopters;
+                    f2 = fighters;
+                }
+                // двигаем первую формацию налево или вниз, а потом - масштабируем ее
+                var sMove1 = new ActionSequence(
+                    f1.MoveLeftTopTo(f1MoveX, f1MoveY, Global.Game.HelicopterSpeed),
+                    f1.ScaleLeftTop(factor)
+                );
+                Global.ActionQueue.Add(sMove1);
+
+                // двигаем вторую формацию налево или вниз, а потом - масштабируем ее
+                var sMove2 = new ActionSequence(
+                    f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
+                    f2.ScaleLeftTop(factor)
+                );
+                Global.ActionQueue.Add(sMove2);
+
+                // после того, как обе формации отмасштабированы, перва€ формаци€ движетьс€ наствречу второй
+                var aPenetrate1 = f1.ShiftTo(shiftX, shiftY);
+                aPenetrate1.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
+                var sPenetrate1 = new ActionSequence(aPenetrate1);
+                Global.ActionQueue.Add(sPenetrate1);
+
+                // а втора€ - навстречу первой до полного проникновени€
+                var aPenetrate2 = f2.ShiftTo(-shiftX, -shiftY);
+                aPenetrate2.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
+                var sPenetrate2 = new ActionSequence(aPenetrate2);
+                Global.ActionQueue.Add(sPenetrate2);
+
+                // todo: сделать получени€ move.X move.Y через делегаты, а не из свойств,
+                //дл€ того, чтобы в момент выполнени€ move там были бы актуальные координаты формации
+                // сейчас компактизирование не работает
+                
+                var fTrunc = FormationFactory.CreateFormation(f1.Rectangle.Left, f1.Rectangle.Top,
+                    f1.Rectangle.Right - 4, f1.Rectangle.Bottom);
+
+                var sCompact = new ActionSequence(fTrunc.ActionList.ToArray());
+                sCompact.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
+                foreach (var action in sCompact)
+                {
+                    action.Urgent = true;
+                }
+                sCompact.Add(fTrunc.Formation.ShiftTo(shiftX, shiftY));
+                Global.ActionQueue.Add(sCompact);
+            }
 
 
-//
+// todo: убрать после экспериментов
 //                var moveAction = fighters.MoveLeftTopTo(50, 250);
 //                var moveAction2 = fighters.MoveLeftTopTo(100, 250);
 //                var moveAction3 = fighters.MoveLeftTopTo(300, 350);
@@ -167,7 +132,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 //                                var splitActions = fighters.Split(50);
 //                                sequence.Add(splitActions);
 
-                //       Global.ActionQueue.Add(sequence);
+            //       Global.ActionQueue.Add(sequence);
 //
 //                var moveAction4 = helicopters.MoveLeftTopTo(250, 50);
 //                var moveAction5 = helicopters.MoveLeftTopTo(250, 100);
@@ -176,7 +141,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 //
 //
 //                Global.ActionQueue.Add(sequence2);
-            }
+
 
             //            if (Global.World.TickIndex % 60 == 0)
             //            {
