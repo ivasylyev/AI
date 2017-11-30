@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -24,90 +25,136 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void SelectionTest()
         {
+            const double eps = 10D;
+            const double deltaShift = 4.5D;
+            const double commonCoordinate = 250D;
+            const double nearCoordinate = 80D;
+            const double farCoordinate = 200D;
+            const double factor = 1.5D;
+            
+
             if (Global.World.TickIndex == 1)
             {
                 var fighters = Global.Formations[-(int) VehicleType.Fighter];
                 var helicopters = Global.Formations[-(int) VehicleType.Helicopter];
 
-                var eps = 10;
-                var delteShift = 4.5;
-                var commonCoordinate = 250;
-                var nearCoordinate = 80;
-                var farCoordinate = 200;
-                var factor = 1.5;
-                if (Math.Abs(fighters.Rectangle.Left - helicopters.Rectangle.Left) < eps)
+                var isLeftTheSame = Math.Abs(fighters.Rectangle.Left - helicopters.Rectangle.Left) < eps;
+
+                Formation f1;
+                Formation f2;
+                double f1MoveX;
+                double f1MoveY;
+                double f2MoveX;
+                double f2MoveY;
+                double shiftX;
+                double shiftY;
+                if (isLeftTheSame)
                 {
-                    Formation topFormation;
-                    Formation bottomFormation;
                     if (fighters.Rectangle.Top < helicopters.Rectangle.Top)
                     {
-                        topFormation = fighters;
-                        bottomFormation = helicopters;
+                        f1 = fighters;
+                        f2 = helicopters;
                     }
                     else
                     {
-                        topFormation = helicopters;
-                        bottomFormation = fighters;
+                        f1 = helicopters;
+                        f2 = fighters;
                     }
-                    var topSequence = new ActionSequence(
-                        topFormation.MoveLeftTopTo(commonCoordinate + delteShift, nearCoordinate,
-                            Global.Game.HelicopterSpeed),
-                        topFormation.ScaleLeftTop(factor)
+                    f1MoveX = commonCoordinate + deltaShift;
+                    f1MoveY = nearCoordinate;
+                    f2MoveX = commonCoordinate;
+                    f2MoveY = farCoordinate;
+                    shiftX = 0;
+                    shiftY = (farCoordinate - nearCoordinate) / 2;
+                    
+                    var sMove1 = new ActionSequence(
+                        f1.MoveLeftTopTo(f1MoveX, f1MoveY, Global.Game.HelicopterSpeed),
+                        f1.ScaleLeftTop(factor)
                     );
-                    Global.ActionQueue.Add(topSequence);
-                    var bottomSequence = new ActionSequence(
-                        bottomFormation.MoveLeftTopTo(commonCoordinate, farCoordinate, Global.Game.HelicopterSpeed),
-                        bottomFormation.ScaleLeftTop(factor)
+                    Global.ActionQueue.Add(sMove1);
+                    var sMove2 = new ActionSequence(
+                        f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
+                        f2.ScaleLeftTop(factor)
                     );
-                    Global.ActionQueue.Add(bottomSequence);
+                    Global.ActionQueue.Add(sMove2);
 
-                    var moveDownAction = topFormation.ShiftTo(0, farCoordinate - nearCoordinate);
-                    moveDownAction.StartCondition = () => topSequence.IsFinished && bottomSequence.IsFinished;
-                    var moveDownSequence = new ActionSequence(moveDownAction);
-                    Global.ActionQueue.Add(moveDownSequence);
 
-                    var moveUpAction = bottomFormation.ShiftTo(0, -farCoordinate + nearCoordinate);
-                    moveUpAction.StartCondition = () => topSequence.IsFinished && bottomSequence.IsFinished;
-                    var moveUpSequence = new ActionSequence(moveUpAction);
-                    Global.ActionQueue.Add(moveUpSequence);
+                    var aPenetrate1 = f1.ShiftTo(shiftX, shiftY);
+                    aPenetrate1.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
+                    var sPenetrate1 = new ActionSequence(aPenetrate1);
+                    Global.ActionQueue.Add(sPenetrate1);
+
+                    var aPenetrate2 = f2.ShiftTo(-shiftX, -shiftY);
+                    aPenetrate2.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
+                    var sPenetrate2 = new ActionSequence(aPenetrate2);
+                    Global.ActionQueue.Add(sPenetrate2);
+
+                    var fTrunc = FormationFactory.CreateFormation(f1.Rectangle.Left, f1.Rectangle.Top,
+                        f1.Rectangle.Right, f1.Rectangle.Bottom - 4);
+
+
+                    var sCompact = new ActionSequence(fTrunc.ActionList.ToArray());
+                    sCompact.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
+                    foreach (var action in sCompact)
+                    {
+                        action.Urgent = true;
+                    }
+                    sCompact.Add(fTrunc.Formation.ShiftTo(shiftX, shiftY));
+                    Global.ActionQueue.Add(sCompact);
                 }
                 else
                 {
-                    Formation leftFormation;
-                    Formation rightFormation;
                     if (fighters.Rectangle.Left < helicopters.Rectangle.Left)
                     {
-                        leftFormation = fighters;
-                        rightFormation = helicopters;
+                        f1 = fighters;
+                        f2 = helicopters;
                     }
                     else
                     {
-                        leftFormation = helicopters;
-                        rightFormation = fighters;
+                        f1 = helicopters;
+                        f2 = fighters;
                     }
-                    var leftSequence = new ActionSequence(
-                        leftFormation.MoveLeftTopTo(nearCoordinate, commonCoordinate + delteShift,
-                            Global.Game.HelicopterSpeed),
-                        leftFormation.ScaleLeftTop(factor)
+                    f1MoveX = nearCoordinate;
+                    f1MoveY = commonCoordinate + deltaShift;
+                    f2MoveX = farCoordinate;
+                    f2MoveY = commonCoordinate;
+                    shiftX = (farCoordinate - nearCoordinate) / 2;
+                    shiftY = 0;
+                    var sMove1 = new ActionSequence(
+                        f1.MoveLeftTopTo(f1MoveX, f1MoveY,Global.Game.HelicopterSpeed),
+                        f1.ScaleLeftTop(factor)
                     );
-                    Global.ActionQueue.Add(leftSequence);
-                    var rightSequence = new ActionSequence(
-                        rightFormation.MoveLeftTopTo(farCoordinate, commonCoordinate, Global.Game.HelicopterSpeed),
-                        rightFormation.ScaleLeftTop(factor)
+                    Global.ActionQueue.Add(sMove1);
+                    
+                    var sMove2 = new ActionSequence(
+                        f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
+                        f2.ScaleLeftTop(factor)
                     );
-                    Global.ActionQueue.Add(rightSequence);
+                    Global.ActionQueue.Add(sMove2);
 
-                    var moveLeftAction = leftFormation.ShiftTo(farCoordinate - nearCoordinate, 0);
-                    moveLeftAction.StartCondition = () => leftSequence.IsFinished && rightSequence.IsFinished;
+                    var aPenetrate1 = f1.ShiftTo(shiftX, shiftY);
+                    aPenetrate1.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
 
-                    var moveLeftSequence = new ActionSequence(moveLeftAction);
-                    Global.ActionQueue.Add(moveLeftSequence);
+                    var sPenetrate1 = new ActionSequence(aPenetrate1);
+                    Global.ActionQueue.Add(sPenetrate1);
 
-                    var moveRightAction = rightFormation.ShiftTo(-farCoordinate + nearCoordinate, 0);
-                    moveRightAction.StartCondition = () => leftSequence.IsFinished && rightSequence.IsFinished;
+                    var aPenetrate2 = f2.ShiftTo(-shiftX, -shiftY);
+                    aPenetrate2.StartCondition = () => sMove1.IsFinished && sMove2.IsFinished;
 
-                    var moveRightSequence = new ActionSequence(moveRightAction);
-                    Global.ActionQueue.Add(moveRightSequence);
+                    var sPenetrate2 = new ActionSequence(aPenetrate2);
+                    Global.ActionQueue.Add(sPenetrate2);
+
+                    var fTrunc = FormationFactory.CreateFormation(f1.Rectangle.Left, f1.Rectangle.Top,
+                        f1.Rectangle.Right - 4, f1.Rectangle.Bottom);
+
+                    var sCompact = new ActionSequence(fTrunc.ActionList.ToArray());
+                    sCompact.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
+                    foreach (var action in sCompact)
+                    {
+                        action.Urgent = true;
+                    }
+                    sCompact.Add(fTrunc.Formation.ShiftTo(shiftX, shiftY));
+                    Global.ActionQueue.Add(sCompact);
                 }
 
 
