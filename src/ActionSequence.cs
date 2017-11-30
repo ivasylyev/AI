@@ -58,6 +58,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
+        public bool IsFinished => Status == ActionStatus.Finished;
+
         public void Add(ActionSequence sequence)
         {
             AddRange(sequence);

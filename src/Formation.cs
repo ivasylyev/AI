@@ -116,7 +116,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var sequence = new ActionSequence(child.ActionList.ToArray());
             if (runFromCenter > 0)
             {
-                sequence.Add(child.Formation.GetShiftAction(-runFromCenter, -runFromCenter));
+                sequence.Add(child.Formation.ShiftTo(-runFromCenter, -runFromCenter));
             }
 
             child = FormationFactory.CreateFormation(MassCenter.X, Rectangle.Top, Rectangle.Right, MassCenter.Y);
@@ -124,7 +124,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
-                sequence.Add(child.Formation.GetShiftAction(runFromCenter, -runFromCenter));
+                sequence.Add(child.Formation.ShiftTo(runFromCenter, -runFromCenter));
             }
 
             child = FormationFactory.CreateFormation(Rectangle.Left, MassCenter.Y, MassCenter.X, Rectangle.Bottom);
@@ -132,29 +132,29 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
-                sequence.Add(child.Formation.GetShiftAction(-runFromCenter, runFromCenter));
+                sequence.Add(child.Formation.ShiftTo(-runFromCenter, runFromCenter));
             }
             child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rectangle.Right, Rectangle.Bottom);
             sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
-                sequence.Add(child.Formation.GetShiftAction(runFromCenter, runFromCenter));
+                sequence.Add(child.Formation.ShiftTo(runFromCenter, runFromCenter));
             }
             return sequence;
         }
 
         public Action MoveCenterTo(double x, double y, double maxSpeed = 10)
         {
-            return GetShiftAction(x - Rectangle.Center.X, y - Rectangle.Center.Y);
+            return GetMoveAction(x - Rectangle.Center.X, y - Rectangle.Center.Y);
         }
 
         public Action MoveLeftTopTo(double x, double y, double maxSpeed = 10)
         {
-            return GetShiftAction(x - Rectangle.Left, y - Rectangle.Top);
+            return GetMoveAction(x - Rectangle.Left, y - Rectangle.Top);
         }
 
-        public Action GetShiftAction(double x, double y, double maxSpeed = 10)
+        private Action GetMoveAction(double x, double y, double maxSpeed = 10)
         {
             var actualX = MassCenter.X;
             var actualY = MassCenter.Y;
@@ -163,8 +163,19 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Action = ActionType.Move,
                 X = x,
                 Y = y,
-                GetDeltaX = () => MassCenter.X - actualX,
-                GetDeltaY = () => MassCenter.Y - actualY,
+                GetDeltaX = () => -MassCenter.X  + actualX,
+                GetDeltaY = () => -MassCenter.Y + actualY,
+                MaxSpeed = maxSpeed
+            };
+            return action;
+        }
+        public Action ShiftTo(double x, double y, double maxSpeed = 10)
+        {
+            var action = new Action(this)
+            {
+                Action = ActionType.Move,
+                X = x,
+                Y = y,
                 MaxSpeed = maxSpeed
             };
             return action;

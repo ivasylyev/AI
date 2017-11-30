@@ -72,6 +72,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         {
                             if (Global.SelectedFormation != action.Formation)
                             {
+                                action.Urgent = true;
                                 action = action.Formation.GetSelectionAction();
                             }
                             else
@@ -102,8 +103,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 else
                 {
                     move.Action = action.Action;
-                    move.X = action.X - action.GetDeltaX();
-                    move.Y = action.Y - action.GetDeltaY();
+                    move.X = action.X + action.GetDeltaX();
+                    move.Y = action.Y + action.GetDeltaY();
                     move.Group = action.Group;
                     move.Angle = action.Angle;
                     move.Left = action.Left;
