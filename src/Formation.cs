@@ -15,7 +15,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
             Children = new List<Formation>();
-            BusyCondition = () => Global.World.TickIndex < WaitUntilIndex || !IsStanding  ;
+            BusyCondition = () =>
+            {
+                return Global.World.TickIndex < WaitUntilIndex || !IsStanding;
+            };
         }
 
         public VehicleType Type { get; set; }

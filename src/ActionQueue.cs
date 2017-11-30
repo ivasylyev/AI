@@ -41,7 +41,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 if (executingAction != null)
                 {
                     if (executingAction.ReadyToFinish)
+                    {
                         executingAction.Status = ActionStatus.Finished;
+                    }
                 }
             }
         }
@@ -60,17 +62,22 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 if (Global.World.TickIndex >= _wait)
                 {
-                    sequence = _internalQueue.FirstOrDefault(s =>s.ReadyToStart);
+                    sequence = _internalQueue.Where(s => s.ReadyToStart).ToList().FirstOrDefault();
                     if (sequence != null)
                     {
                         _wait = -1;
 
                         var action = sequence.GetPendingAction();
-                        if (action.Formation != null && Global.SelectedFormation != action.Formation)
+                        if (action.Formation != null)
                         {
-                            Global.SelectedFormation = action.Formation;
-
-                            action = action.Formation.GetSelectionAction();
+                            if (Global.SelectedFormation != action.Formation)
+                            {
+                                action = action.Formation.GetSelectionAction();
+                            }
+                            else
+                            {
+                                action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
+                            }
                         }
                         Execute(sequence, action, Global.Move);
                     }
@@ -112,7 +119,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                     if (action.Formation != null)
                     {
-                        action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
                         if (action.Action == ActionType.ClearAndSelect)
                         {
                             Global.SelectedFormation = action.Formation;
