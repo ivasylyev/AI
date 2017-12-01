@@ -109,7 +109,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             sShift.Add(res.Formation.ShiftTo(shiftX, shiftY));
             Global.ActionQueue.Add(sShift);
 
-            //   компактизируем 
+            //   компактизируем  
             res = FormationFactory.CreateFormation(
                 () => Math.Min(f1.Rect.Left, f2.Rect.Left),
                 () => Math.Min(f1.Rect.Top, f2.Rect.Top),
