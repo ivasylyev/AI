@@ -26,11 +26,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         private void SelectionTest()
         {
             const double eps = 10D;
-            const double deltaShift = 4.8D;
+            const double deltaShift = 5.1D;
             const double commonCoordinate = 250D;
-            const double nearCoordinate = 50D;
+            const double nearCoordinate = 60D;
             const double farCoordinate = 200D;
-            const double factor = 1.6D;
+            const double factor = 1.7D;
             const double vehicleSize = 4D;
 
 
@@ -51,6 +51,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 double shiftY;
                 double compactX;
                 double compactY;
+                double angle;
 
                 if (isVertical)
                 {
@@ -61,7 +62,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     shiftX = 0;
                     shiftY = (farCoordinate - nearCoordinate) / 2;
                     compactX = 0;
-                    compactY = vehicleSize;
+                    compactY = 3*vehicleSize;
+                    angle = Math.PI / 4;
                 }
 
                 else
@@ -72,9 +74,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     f2MoveY = commonCoordinate;
                     shiftX = (farCoordinate - nearCoordinate) / 2;
                     shiftY = 0;
-                    compactX = vehicleSize;
+                    compactX = 3*vehicleSize;
                     compactY = 0;
-
+                    angle = -Math.PI / 4;
                 }
                 if (isVertical && fighters.Rect.Top < helicopters.Rect.Top ||
                     !isVertical && fighters.Rect.Left < helicopters.Rect.Left)
@@ -89,14 +91,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 }
                 // двигаем первую формацию налево или вниз, а потом - масштабируем ее
                 var sMove1 = new ActionSequence(
-                    f1.MoveLeftTopTo(f1MoveX, f1MoveY, Global.Game.HelicopterSpeed),
+                    f1.MoveLeftTopTo(f1MoveX, f1MoveY),
                     f1.ScaleLeftTop(factor)
                 );
                 Global.ActionQueue.Add(sMove1);
 
                 // двигаем вторую формацию налево или вниз, а потом - масштабируем ее
                 var sMove2 = new ActionSequence(
-                    f2.MoveLeftTopTo(f2MoveX, f2MoveY, Global.Game.HelicopterSpeed),
+                    f2.MoveLeftTopTo(f2MoveX, f2MoveY),
                     f2.ScaleLeftTop(factor)
                 );
                 Global.ActionQueue.Add(sMove2);
@@ -115,31 +117,29 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 // сплющиваем сбоку бутерброд
                 var res = FormationFactory.CreateFormation(
-                    () => f1.Rect.Left, () => f1.Rect.Top,
-                    () => f1.Rect.Right - compactX, () => f1.Rect.Bottom - compactY);
+                    () => Math.Min(f1.Rect.Left, f2.Rect.Left),
+                    () => Math.Min(f1.Rect.Top, f2.Rect.Top),
+                    () => Math.Max(f1.Rect.Right, f2.Rect.Right)-compactX,
+                    () => Math.Max(f1.Rect.Bottom, f2.Rect.Bottom)-compactY);
 
                 var sShift = new ActionSequence(res.ActionList.ToArray());
                 sShift.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
-                foreach (var action in sShift)
-                {
-                    action.Urgent = true;
-                }
+
                 sShift.Add(res.Formation.ShiftTo(shiftX, shiftY));
                 Global.ActionQueue.Add(sShift);
 
-                // сплющиваем сбоку бутерброд
-                //                res = FormationFactory.CreateFormation(
-                //                    () => Math.Min(f1.Rect.Left, f2.Rect.Left),
-                //                    () => Math.Min(f1.Rect.Top, f2.Rect.Top),
-                //                    () => Math.Max(f1.Rect.Right, f2.Rect.Right),
-                //                    () => Math.Max(f1.Rect.Bottom, f2.Rect.Bottom));
-                //
-                //                var sCompact = new ActionSequence(res.ActionList.ToArray());
-                //                sCompact.First().StartCondition = () => sShift.IsFinished;
-                //                sCompact.Add(res.Formation.ScaleCenter(0.5));
-                //                sCompact.Add(res.Formation.ShiftTo(10,10));
-                //                Global.ActionQueue.Add(sCompact);
+                //   компактизируем 
+                res = FormationFactory.CreateFormation(
+                    () => Math.Min(f1.Rect.Left, f2.Rect.Left),
+                    () => Math.Min(f1.Rect.Top, f2.Rect.Top),
+                    () => Math.Max(f1.Rect.Right, f2.Rect.Right),
+                    () => Math.Max(f1.Rect.Bottom, f2.Rect.Bottom));
 
+                var sCompact = new ActionSequence(res.ActionList.ToArray());
+                sCompact.First().StartCondition = () => sShift.IsFinished;
+                sCompact.Add(res.Formation.ScaleCenter(0.5));
+                sCompact.Add(res.Formation.ShiftTo(10, 10));
+                Global.ActionQueue.Add(sCompact);
             }
 
 
