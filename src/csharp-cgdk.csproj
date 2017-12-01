@@ -99,11 +99,13 @@
     <Compile Include="IStrategy.cs" />
     <Compile Include="MyOldStrategy.cs" />
     <Compile Include="MyStrategy.cs" />
+    <Compile Include="OperationalActions.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="RemoteProcessClient.cs" />
     <Compile Include="Runner.cs" />
+    <Compile Include="TacticalActions.cs" />
     <Compile Include="VehicleWrapper.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             UpdateFormations();
 
             Global.ActionQueue.Update();
+
+            if (Global.World.TickIndex == 0)
+            {
+                Global.MyAirFormation = TacticalActions.CreateAirFormation();
+            }
         }
 
         private static void InitGlobal(Player me, World world, Game game, Move move)

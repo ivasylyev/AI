@@ -106,100 +106,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
 
-        public ActionSequence Split(int runFromCenter = 0)
-        {
-            var child = FormationFactory.CreateFormation(Rect.Left, Rect.Top, MassCenter.X, MassCenter.Y);
-            Children.Add(child.Formation);
-            var sequence = new ActionSequence(child.ActionList.ToArray());
-            if (runFromCenter > 0)
-            {
-                sequence.Add(child.Formation.ShiftTo(-runFromCenter, -runFromCenter));
-            }
-
-            child = FormationFactory.CreateFormation(MassCenter.X, Rect.Top, Rect.Right, MassCenter.Y);
-            sequence.AddRange(child.ActionList);
-            Children.Add(child.Formation);
-            if (runFromCenter > 0)
-            {
-                sequence.Add(child.Formation.ShiftTo(runFromCenter, -runFromCenter));
-            }
-
-            child = FormationFactory.CreateFormation(Rect.Left, MassCenter.Y, MassCenter.X, Rect.Bottom);
-            sequence.AddRange(child.ActionList);
-            Children.Add(child.Formation);
-            if (runFromCenter > 0)
-            {
-                sequence.Add(child.Formation.ShiftTo(-runFromCenter, runFromCenter));
-            }
-            child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rect.Right, Rect.Bottom);
-            sequence.AddRange(child.ActionList);
-            Children.Add(child.Formation);
-            if (runFromCenter > 0)
-            {
-                sequence.Add(child.Formation.ShiftTo(runFromCenter, runFromCenter));
-            }
-            return sequence;
-        }
-
-        public Action MoveCenterTo(double x, double y, double maxSpeed = 10)
-        {
-            var action = new Action(this)
-            {
-                ActionType = ActionType.Move,
-                GetX = () => x - Rect.Left,
-                GetY = () => y - Rect.Top,
-                MaxSpeed = maxSpeed
-            };
-            return action;
-        }
-
-        public Action MoveLeftTopTo(double x, double y, double maxSpeed = 10)
-        {
-            var action = new Action(this)
-            {
-                ActionType = ActionType.Move,
-                GetX = () => x - MassCenter.X,
-                GetY = () => y - MassCenter.Y,
-                MaxSpeed = maxSpeed
-            };
-            return action;
-        }
-
-        public Action ShiftTo(double x, double y, double maxSpeed = 10)
-        {
-            var action = new Action(this)
-            {
-                ActionType = ActionType.Move,
-                GetX = () => x,
-                GetY = () => y,
-                MaxSpeed = maxSpeed
-            };
-            return action;
-        }
-
-        public Action ScaleCenter(double factor)
-        {
-            var action = new Action(this)
-            {
-                ActionType = ActionType.Scale,
-                Factor = factor,
-                GetX = () => MassCenter.X,
-                GetY = () => MassCenter.Y,
-            };
-            return action;
-        }
-        public Action ScaleLeftTop(double factor)
-        {
-            var action = new Action(this)
-            {
-                ActionType = ActionType.Scale,
-                Factor = factor,
-                GetX = () => Rect.Left,
-                GetY = () => Rect.Top,
-            };
-            return action;
-        }
        
+
 
         public Action GetSelectionAction()
         {
@@ -211,8 +119,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             else
             {
                 action.VehicleType = Type;
-                action.GetRight = ()=> Global.World.Width;
-                action.GetBottom  = () => Global.World.Height;
+                action.GetRight = () => Global.World.Width;
+                action.GetBottom = () => Global.World.Height;
             }
             return action;
         }
