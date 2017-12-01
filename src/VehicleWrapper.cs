@@ -7,13 +7,30 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
     {
         private const int HistoryLength = 10;
         private readonly Point[] _history = new Point[HistoryLength];
+        public long TickIndex { get; private set; }
+
         public long Id { get; set; }
         public VehicleType Type { get; set; }
-        public long TickIndex { get; private set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public int Durability { get; set; }
         public long PlayerId { get; set; }
+        public int Durability { get; set; }
+        public int MaxDurability { get; set; }
+        public double MaxSpeed { get; set; }
+        public double SquaredVisionRange { get; set; }
+        public double GroundAttackRange { get; set; }
+        public double SquaredGroundAttackRange { get; set; }
+        public double AerialAttackRange { get; set; }
+        public double SquaredAerialAttackRange { get; set; }
+        public int GroundDamage { get; set; }
+        public int AerialDamage { get; set; }
+        public int GroundDefence { get; set; }
+        public int AerialDefence { get; set; }
+        public int AttackCooldownTicks { get; set; }
+        public int RemainingAttackCooldownTicks { get; set; }
+        public bool IsAerial { get; set; }
+        public bool IsSelected { get; set; }
+
 
         public Point Speed => new Point(SpeedX, SpeedY);
         public double SpeedX => (_history[0].X - _history[HistoryLength - 1].X) / HistoryLength;
@@ -32,9 +49,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Type = vehicle.Type,
                 X = vehicle.X,
                 Y = vehicle.Y,
-                Durability = vehicle.Durability,
                 PlayerId = vehicle.PlayerId,
-                VisionRange = vehicle.VisionRange
+                Durability = vehicle.Durability,
+                MaxDurability = vehicle.MaxDurability,
+                MaxSpeed = vehicle.MaxSpeed,
+                VisionRange = vehicle.VisionRange,
+                SquaredVisionRange = vehicle.SquaredVisionRange,
+                GroundAttackRange = vehicle.GroundAttackRange,
+                SquaredGroundAttackRange = vehicle.SquaredGroundAttackRange,
+                AerialAttackRange = vehicle.AerialAttackRange,
+                SquaredAerialAttackRange = vehicle.SquaredAerialAttackRange,
+                GroundDamage = vehicle.GroundDamage,
+                AerialDamage = vehicle.AerialDamage,
+                GroundDefence = vehicle.GroundDefence,
+                AerialDefence = vehicle.AerialDefence,
+                AttackCooldownTicks = vehicle.AttackCooldownTicks,
+                RemainingAttackCooldownTicks = vehicle.RemainingAttackCooldownTicks,
+                IsAerial = vehicle.IsAerial,
+                IsSelected = vehicle.IsSelected
             };
             for (var i = 0; i < HistoryLength; i++)
             {
