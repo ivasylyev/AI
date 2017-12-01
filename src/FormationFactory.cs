@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
@@ -31,22 +32,18 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static FormationResult CreateFormation(double left, double top, double right, double bottom)
         {
+            return CreateFormation(() => left, () => top, () => right, () => bottom);
+        }
+
+        public static FormationResult CreateFormation(Func<double> left, Func<double> top, 
+            Func<double> right,Func<double> bottom)
+        {
             var formation = new Formation
             {
-                GroupIndex = GetFreeFormationIndex()
+                GroupIndex = GetFreeFormationIndex(),
+                Alive = false
             };
 
-            var rect = new Rect(left, top, right, bottom);
-
-            foreach (var keyVal in Global.MyVehicles)
-            {
-                if (keyVal.Value.IsInside(rect))
-                {
-                    formation.Vehicles.Add(keyVal.Key, keyVal.Value);
-                }
-            }
-
-            formation.Update();
 
             var list = SelectAndAssignVehicles(formation, left, top, right, bottom, formation.GroupIndex);
 
@@ -60,22 +57,37 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             };
         }
 
-        private static List<Action> SelectAndAssignVehicles(Formation formation, double left, double top,
-            double right,
-            double bottom, int groupIndex)
+        private static List<Action> SelectAndAssignVehicles(Formation formation,
+            Func<double> left, Func<double> top, Func<double> right, Func<double> bottom, int groupIndex)
         {
             var selectAction = new Action
             {
-                Action = ActionType.ClearAndSelect,
-                Left = left,
-                Top = top,
-                Right = right,
-                Bottom = bottom
+                ActionType = ActionType.ClearAndSelect,
+                GetLeft = left,
+                GetTop = top,
+                GetRight = right,
+                GetBottom = bottom
             };
-            selectAction.Callback = () => { selectAction.Status = ActionStatus.Finished; };
+            selectAction.Callback = () =>
+            {
+                var rect = new Rect(left(), top(), right(), bottom());
+
+                foreach (var keyVal in Global.MyVehicles)
+                {
+                    if (keyVal.Value.IsInside(rect))
+                    {
+                        formation.Vehicles.Add(keyVal.Key, keyVal.Value);
+                    }
+                }
+
+                formation.Update();
+
+                selectAction.Status = ActionStatus.Finished;
+            };
+
             var assignAction = new Action
             {
-                Action = ActionType.Assign,
+                ActionType = ActionType.Assign,
                 Group = groupIndex
             };
             assignAction.Callback = () =>

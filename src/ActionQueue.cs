@@ -102,15 +102,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 }
                 else
                 {
-                    move.Action = action.Action;
-                    move.X = action.X + action.GetDeltaX();
-                    move.Y = action.Y + action.GetDeltaY();
+                    move.Action = action.ActionType;
+                    move.X = action.GetX();
+                    move.Y = action.GetY();
                     move.Group = action.Group;
                     move.Angle = action.Angle;
-                    move.Left = action.Left;
-                    move.Top = action.Top;
-                    move.Right = action.Right;
-                    move.Bottom = action.Bottom;
+                    move.Left = action.GetLeft();
+                    move.Top = action.GetTop();
+                    move.Right = action.GetRight();
+                    move.Bottom = action.GetBottom();
                     move.VehicleType = action.VehicleType;
                     move.MaxSpeed = action.MaxSpeed;
                     move.MaxAngularSpeed = action.MaxAngularSpeed;
@@ -118,12 +118,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     move.FacilityId = action.FacilityId;
                     move.VehicleId = action.VehicleId;
 
-                    if (action.Formation != null)
+                    if (action.Formation != null && action.ActionType == ActionType.ClearAndSelect)
                     {
-                        if (action.Action == ActionType.ClearAndSelect)
-                        {
-                            Global.SelectedFormation = action.Formation;
-                        }
+                        Global.SelectedFormation = action.Formation;
                     }
                 }
 

@@ -15,10 +15,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
             Children = new List<Formation>();
-            BusyCondition = () =>
-            {
-                return Global.World.TickIndex < WaitUntilIndex || !IsStanding;
-            };
+            BusyCondition = () => { return Global.World.TickIndex < WaitUntilIndex || !IsStanding; };
         }
 
         public VehicleType Type { get; set; }
@@ -27,7 +24,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public Dictionary<long, VehicleWrapper> Vehicles { get; }
 
-        public Rect Rectangle { get; set; }
+        public Rect Rect { get; set; }
 
         public Point MassCenter { get; set; }
 
@@ -47,7 +44,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     return 0;
                 }
                 var radius =
-                    Rectangle.Center.Distance(Vehicles.Values.OrderBy(i => Rectangle.Center.Distance(i)).Last());
+                    Rect.Center.Distance(Vehicles.Values.OrderBy(i => Rect.Center.Distance(i)).Last());
                 var sq = Math.PI * radius * radius;
                 return Vehicles.Count / sq;
             }
@@ -102,7 +99,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     }
                 }
             }
-            Rectangle = new Rect(Vehicles.Values);
+            Rect = new Rect(Vehicles.Values);
             MassCenter = Vehicles.Any()
                 ? new Point(Vehicles.Values.Average(i => i.X), Vehicles.Values.Average(i => i.Y))
                 : Point.Zero;
@@ -111,7 +108,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public ActionSequence Split(int runFromCenter = 0)
         {
-            var child = FormationFactory.CreateFormation(Rectangle.Left, Rectangle.Top, MassCenter.X, MassCenter.Y);
+            var child = FormationFactory.CreateFormation(Rect.Left, Rect.Top, MassCenter.X, MassCenter.Y);
             Children.Add(child.Formation);
             var sequence = new ActionSequence(child.ActionList.ToArray());
             if (runFromCenter > 0)
@@ -119,7 +116,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 sequence.Add(child.Formation.ShiftTo(-runFromCenter, -runFromCenter));
             }
 
-            child = FormationFactory.CreateFormation(MassCenter.X, Rectangle.Top, Rectangle.Right, MassCenter.Y);
+            child = FormationFactory.CreateFormation(MassCenter.X, Rect.Top, Rect.Right, MassCenter.Y);
             sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
@@ -127,14 +124,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 sequence.Add(child.Formation.ShiftTo(runFromCenter, -runFromCenter));
             }
 
-            child = FormationFactory.CreateFormation(Rectangle.Left, MassCenter.Y, MassCenter.X, Rectangle.Bottom);
+            child = FormationFactory.CreateFormation(Rect.Left, MassCenter.Y, MassCenter.X, Rect.Bottom);
             sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
             {
                 sequence.Add(child.Formation.ShiftTo(-runFromCenter, runFromCenter));
             }
-            child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rectangle.Right, Rectangle.Bottom);
+            child = FormationFactory.CreateFormation(MassCenter.X, MassCenter.Y, Rect.Right, Rect.Bottom);
             sequence.AddRange(child.ActionList);
             Children.Add(child.Formation);
             if (runFromCenter > 0)
@@ -146,72 +143,83 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public Action MoveCenterTo(double x, double y, double maxSpeed = 10)
         {
-            return GetMoveAction(x - Rectangle.Center.X, y - Rectangle.Center.Y);
+            var action = new Action(this)
+            {
+                ActionType = ActionType.Move,
+                GetX = () => x - Rect.Left,
+                GetY = () => y - Rect.Top,
+                MaxSpeed = maxSpeed
+            };
+            return action;
         }
 
         public Action MoveLeftTopTo(double x, double y, double maxSpeed = 10)
         {
-            return GetMoveAction(x - Rectangle.Left, y - Rectangle.Top);
-        }
-
-        private Action GetMoveAction(double x, double y, double maxSpeed = 10)
-        {
-            var actualX = MassCenter.X;
-            var actualY = MassCenter.Y;
             var action = new Action(this)
             {
-                Action = ActionType.Move,
-                X = x,
-                Y = y,
-                GetDeltaX = () => -MassCenter.X  + actualX,
-                GetDeltaY = () => -MassCenter.Y + actualY,
+                ActionType = ActionType.Move,
+                GetX = () => x - MassCenter.X,
+                GetY = () => y - MassCenter.Y,
                 MaxSpeed = maxSpeed
             };
             return action;
         }
+
         public Action ShiftTo(double x, double y, double maxSpeed = 10)
         {
             var action = new Action(this)
             {
-                Action = ActionType.Move,
-                X = x,
-                Y = y,
+                ActionType = ActionType.Move,
+                GetX = () => x,
+                GetY = () => y,
                 MaxSpeed = maxSpeed
             };
             return action;
         }
 
-        public Action ScaleLeftTop(double factor)
+        public Action ScaleCenter(double factor)
         {
-            var actualX = MassCenter.X;
-            var actualY = MassCenter.Y;
             var action = new Action(this)
             {
-                Action = ActionType.Scale,
+                ActionType = ActionType.Scale,
                 Factor = factor,
-                X = Rectangle.Left,
-                Y = Rectangle.Top,
-                GetDeltaX = () => MassCenter.X - actualX,
-                GetDeltaY = () => MassCenter.Y - actualY
+                GetX = () => MassCenter.X,
+                GetY = () => MassCenter.Y,
             };
             return action;
         }
-
+        public Action ScaleLeftTop(double factor)
+        {
+            var action = new Action(this)
+            {
+                ActionType = ActionType.Scale,
+                Factor = factor,
+                GetX = () => Rect.Left,
+                GetY = () => Rect.Top,
+            };
+            return action;
+        }
+       
 
         public Action GetSelectionAction()
         {
-            var move = new Action(this) {Action = ActionType.ClearAndSelect};
+            var action = new Action(this) {ActionType = ActionType.ClearAndSelect};
             if (GroupIndex > 0)
             {
-                move.Group = GroupIndex;
+                action.Group = GroupIndex;
             }
             else
             {
-                move.VehicleType = Type;
-                move.Right = Global.World.Width;
-                move.Bottom = Global.World.Height;
+                action.VehicleType = Type;
+                action.GetRight = ()=> Global.World.Width;
+                action.GetBottom  = () => Global.World.Height;
             }
-            return move;
+            return action;
+        }
+
+        public override string ToString()
+        {
+            return $"{Type}, Busy:{Busy}, Rect:{Rect}";
         }
     }
 }
