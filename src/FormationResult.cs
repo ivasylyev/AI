@@ -4,7 +4,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public class FormationResult
     {
-        public Formation Formation { get; set; }
+        public MyFormation Formation { get; set; }
         public List<Action> ActionList { get; set; }
         public int GroupIndex { get; set; }
     }

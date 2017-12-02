@@ -28,7 +28,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return action.WaitForWorldTick;
         }
 
-        public bool HasActionsFor(Formation formation)
+        public bool HasActionsFor(MyFormation formation)
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
         }
@@ -118,9 +118,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     move.FacilityId = action.FacilityId;
                     move.VehicleId = action.VehicleId;
 
-                    if (action.Formation != null && action.ActionType == ActionType.ClearAndSelect)
+                    if (action.Formation != null)
                     {
-                        Global.SelectedFormation = action.Formation;
+                        action.Formation.ExecutingAction = action;
+                        action.Formation.ExecutingSequence = sequence;
+                        if (action.ActionType == ActionType.ClearAndSelect)
+                        {
+                            Global.SelectedFormation = action.Formation;
+                        }
                     }
                 }
 
@@ -130,7 +135,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
             finally
             {
-                if (!sequence.Any() || sequence.All(a => a.Status == ActionStatus.Finished))
+                if (sequence.IsFinished)
                 {
                     _internalQueue.Remove(sequence);
                 }

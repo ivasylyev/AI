@@ -2,19 +2,13 @@
 {
     public static class OperationalActions
     {
-        public static Action MoveCenterTo(this Formation formation, double x, double y, double maxSpeed = 10)
+        public static Action MoveCenterTo(this MyFormation formation, Point point, double maxSpeed = 10)
         {
-            var action = new Action(formation)
-            {
-                ActionType = Model.ActionType.Move,
-                GetX = () => x - formation.Rect.Left,
-                GetY = () => y - formation.Rect.Top,
-                MaxSpeed = maxSpeed
-            };
-            return action;
+            return MoveCenterTo(formation, point.X, point.Y);
         }
 
-        public static Action MoveLeftTopTo(this Formation formation, double x, double y, double maxSpeed = 10)
+
+        public static Action MoveCenterTo(this MyFormation formation, double x, double y, double maxSpeed = 10)
         {
             var action = new Action(formation)
             {
@@ -26,7 +20,24 @@
             return action;
         }
 
-        public static Action ShiftTo(this Formation formation, double x, double y, double maxSpeed = 10)
+        public static Action MoveLeftTopTo(this MyFormation formation, Point point, double maxSpeed = 10)
+        {
+            return MoveLeftTopTo(formation, point.X, point.Y);
+        }
+
+        public static Action MoveLeftTopTo(this MyFormation formation, double x, double y, double maxSpeed = 10)
+        {
+            var action = new Action(formation)
+            {
+                GetX = () => x - formation.Rect.Left,
+                GetY = () => y - formation.Rect.Top,
+                ActionType = Model.ActionType.Move,
+                MaxSpeed = maxSpeed
+            };
+            return action;
+        }
+
+        public static Action ShiftTo(this MyFormation formation, double x, double y, double maxSpeed = 10)
         {
             var action = new Action(formation)
             {
@@ -38,7 +49,7 @@
             return action;
         }
 
-        public static Action ScaleCenter(this Formation formation, double factor)
+        public static Action ScaleCenter(this MyFormation formation, double factor)
         {
             var action = new Action(formation)
             {
@@ -50,7 +61,7 @@
             return action;
         }
 
-        public static Action ScaleLeftTop(this Formation formation, double factor)
+        public static Action ScaleLeftTop(this MyFormation formation, double factor)
         {
             var action = new Action(formation)
             {
@@ -62,7 +73,7 @@
             return action;
         }
 
-        public static Action RotateCenter(this Formation formation, double angle)
+        public static Action RotateCenter(this MyFormation formation, double angle)
         {
             var action = new Action(formation)
             {

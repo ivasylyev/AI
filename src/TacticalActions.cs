@@ -6,7 +6,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class TacticalActions
     {
-        public static Formation CreateAirFormation()
+        public static MyFormation CreateAirFormation()
         {
             const double eps = 10D;
             const double deltaShift = 5.1D;
@@ -22,8 +22,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             var isVertical = Math.Abs(fighters.Rect.Left - helicopters.Rect.Left) < eps;
 
-            Formation f1;
-            Formation f2;
+            MyFormation f1;
+            MyFormation f2;
             double f1MoveX;
             double f1MoveY;
             double f2MoveX;
@@ -97,7 +97,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Global.ActionQueue.Add(sPenetrate2);
 
             // сплющиваем сбоку бутерброд
-            var res = FormationFactory.CreateFormation(
+            var res = FormationFactory.CreateMyFormation(
                 () => Math.Min(f1.Rect.Left, f2.Rect.Left),
                 () => Math.Min(f1.Rect.Top, f2.Rect.Top),
                 () => Math.Max(f1.Rect.Right, f2.Rect.Right) - compactX,
@@ -110,7 +110,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Global.ActionQueue.Add(sShift);
 
             //   компактизируем  
-            res = FormationFactory.CreateFormation(
+            res = FormationFactory.CreateMyFormation(
                 () => Math.Min(f1.Rect.Left, f2.Rect.Left),
                 () => Math.Min(f1.Rect.Top, f2.Rect.Top),
                 () => Math.Max(f1.Rect.Right, f2.Rect.Right),
@@ -127,9 +127,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return res.Formation;
         }
 
-        public static void SplitFormation(Formation formation, int runFromCenter = 0)
+        public static void SplitFormation(MyFormation formation, int runFromCenter = 0)
         {
-            var child = FormationFactory.CreateFormation(
+            var child = FormationFactory.CreateMyFormation(
                 () => formation.Rect.Left,
                 () => formation.Rect.Top,
                 () => formation.MassCenter.X,
@@ -141,7 +141,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 sequence.Add(child.Formation.ShiftTo(-runFromCenter, -runFromCenter));
             }
 
-            child = FormationFactory.CreateFormation(
+            child = FormationFactory.CreateMyFormation(
                 () => formation.MassCenter.X,
                 () => formation.Rect.Top,
                 () => formation.Rect.Right,
@@ -153,7 +153,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 sequence.Add(child.Formation.ShiftTo(runFromCenter, -runFromCenter));
             }
 
-            child = FormationFactory.CreateFormation(
+            child = FormationFactory.CreateMyFormation(
                 () => formation.Rect.Left,
                 () => formation.MassCenter.Y,
                 () => formation.MassCenter.X,
@@ -164,7 +164,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 sequence.Add(child.Formation.ShiftTo(-runFromCenter, runFromCenter));
             }
-            child = FormationFactory.CreateFormation(
+            child = FormationFactory.CreateMyFormation(
                 () => formation.MassCenter.X,
                 () => formation.MassCenter.Y,
                 () => formation.Rect.Right,

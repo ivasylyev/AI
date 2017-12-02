@@ -7,33 +7,19 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public class Formation
     {
-        public readonly List<Formation> Children;
-
         public Formation()
         {
-            WaitUntilIndex = -1;
-            Alive = false;
             Vehicles = new Dictionary<long, VehicleWrapper>();
-            Children = new List<Formation>();
-            BusyCondition = () => { return Global.World.TickIndex < WaitUntilIndex || !IsStanding; };
         }
-
-        public VehicleType Type { get; set; }
-
-        public int GroupIndex { get; set; }
 
         public Dictionary<long, VehicleWrapper> Vehicles { get; }
 
+        public VehicleType Type { get; set; }
+        public int GroupIndex { get; set; }
+        
         public Rect Rect { get; set; }
-
         public Point MassCenter { get; set; }
-
-        public int WaitUntilIndex { get; set; }
-
-        public Func<bool> BusyCondition { get; set; }
-
-        public bool Busy => BusyCondition != null && BusyCondition();
-        public bool Alive { get; set; }
+        public Point Center => Rect.Center;
 
         public double Density
         {
@@ -44,7 +30,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     return 0;
                 }
                 var radius =
-                    Rect.Center.Distance(Vehicles.Values.OrderBy(i => Rect.Center.Distance(i)).Last());
+                    Rect.Center.Distance(Vehicles.Values.OrderBy(i => Rect.Center.SqrDistance(i)).Last());
                 var sq = Math.PI * radius * radius;
                 return Vehicles.Count / sq;
             }
@@ -78,16 +64,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public bool IsStanding => !Vehicles.Any() || Vehicles.Values.All(v => v.IsStanding);
 
-        public bool IsNear()
-        {
-            var near = Global.EnemyVehicles.Values
-                .Count(
-                    enemy => Global.MyVehicles.Values.Where(v => v.Type != VehicleType.Fighter)
-                        .Any(i => i.SqrDistance(enemy) < i.VisionRange * i.VisionRange));
-            return near > 20;
-        }
 
-        public void Update(IEnumerable<VehicleUpdate> updates = null)
+        public virtual void Update(IEnumerable<VehicleUpdate> updates = null)
         {
             if (updates != null)
             {
@@ -106,28 +84,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
 
-       
-
-
-        public Action GetSelectionAction()
-        {
-            var action = new Action(this) {ActionType = ActionType.ClearAndSelect};
-            if (GroupIndex > 0)
-            {
-                action.Group = GroupIndex;
-            }
-            else
-            {
-                action.VehicleType = Type;
-                action.GetRight = () => Global.World.Width;
-                action.GetBottom = () => Global.World.Height;
-            }
-            return action;
-        }
-
         public override string ToString()
         {
-            return $"{Type}, Busy:{Busy}, Rect:{Rect}";
+            return $"{Type}, Rect:{Rect}";
         }
     }
 }

@@ -54,17 +54,33 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     return ActionStatus.Pending;
                 }
+                if (this.Any(a => a.Status == ActionStatus.Aborted))
+                {
+                    return ActionStatus.Aborted;
+                }
                 return ActionStatus.Undefined;
             }
         }
 
-        public bool IsFinished => Status == ActionStatus.Finished;
+        public bool IsFinished => Status == ActionStatus.Finished || Status == ActionStatus.Aborted;
 
         public void Add(ActionSequence sequence)
         {
             AddRange(sequence);
         }
 
+        public void AbortExecutingAction()
+        {
+            GetExecutingAction()?.Abort();
+        }
+
+        public void AbortAll()
+        {
+            foreach (var action in this)
+            {
+                action.Abort();
+            }
+        }
 
         public Action GetExecutingAction()
         {

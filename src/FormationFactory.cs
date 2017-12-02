@@ -7,9 +7,30 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class FormationFactory
     {
-        public static Formation CreateFormation(VehicleType type)
+        public static EnemyFormation CreateEnemyFormation(VehicleType type)
         {
-            var formation = new Formation
+            var formation = new EnemyFormation
+            {
+                GroupIndex = -(int) type,
+                Type = type
+            };
+
+            foreach (var keyVal in Global.EnemyVehicles)
+            {
+                if (keyVal.Value.Type == type)
+                {
+                    formation.Vehicles.Add(keyVal.Key, keyVal.Value);
+                }
+            }
+
+            formation.Update();
+            Global.EnemyFormations.Add(formation.GroupIndex, formation);
+            return formation;
+        }
+
+        public static MyFormation CreateMyFormation(VehicleType type)
+        {
+            var formation = new MyFormation
             {
                 GroupIndex = -(int) type,
                 Type = type
@@ -25,29 +46,29 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             formation.Update();
 
-            Global.Formations.Add(formation.GroupIndex, formation);
+            Global.MyFormations.Add(formation.GroupIndex, formation);
             formation.Alive = true;
             return formation;
         }
 
-        public static FormationResult CreateFormation(double left, double top, double right, double bottom)
+        public static FormationResult CreateMyFormation(double left, double top, double right, double bottom)
         {
-            return CreateFormation(() => left, () => top, () => right, () => bottom);
+            return CreateMyFormation(() => left, () => top, () => right, () => bottom);
         }
 
-        public static FormationResult CreateFormation(Func<double> left, Func<double> top, 
-            Func<double> right,Func<double> bottom)
+        public static FormationResult CreateMyFormation(Func<double> left, Func<double> top,
+            Func<double> right, Func<double> bottom)
         {
-            var formation = new Formation
+            var formation = new MyFormation
             {
-                GroupIndex = GetFreeFormationIndex(),
+                GroupIndex = GetMyFreeFormationIndex(),
                 Alive = false
             };
 
 
             var list = SelectAndAssignVehicles(formation, left, top, right, bottom, formation.GroupIndex);
 
-            Global.Formations.Add(formation.GroupIndex, formation);
+            Global.MyFormations.Add(formation.GroupIndex, formation);
 
             return new FormationResult
             {
@@ -57,7 +78,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             };
         }
 
-        private static List<Action> SelectAndAssignVehicles(Formation formation,
+        private static List<Action> SelectAndAssignVehicles(MyFormation formation,
             Func<double> left, Func<double> top, Func<double> right, Func<double> bottom, int groupIndex)
         {
             var selectAction = new Action
@@ -100,9 +121,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
 
-        public static int GetFreeFormationIndex()
+        public static int GetMyFreeFormationIndex()
         {
-            return Enumerable.Range(1, 100).Except(Global.Formations.Keys).FirstOrDefault();
+            return Enumerable.Range(1, 100).Except(Global.MyFormations.Keys).FirstOrDefault();
+        }
+
+        public static int GetEnemyFreeFormationIndex()
+        {
+            return Enumerable.Range(1, 100).Except(Global.EnemyFormations.Keys).FirstOrDefault();
         }
     }
 }

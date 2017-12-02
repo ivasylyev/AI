@@ -25,7 +25,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public bool Urgent { get; set; }
         public int WaitForWorldTick { get; set; }
-        public ActionStatus Status { get; set; }
+        public ActionStatus Status { get; set; } = ActionStatus.Pending;
 
         public Func<bool> StartCondition;
         public Func<bool> FinishCondition;
@@ -39,7 +39,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public System.Action Callback;
 
-        public Formation Formation { get; set; }
+        public MyFormation Formation { get; set; }
 
         public int MinimumDuration { get; set; }
 
@@ -51,12 +51,17 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             MinimumDuration = minimumDuration;
         }
 
-        public Action(Formation formation, int minimumDuration = DefaultMinimalDuration)
+        public Action(MyFormation formation, int minimumDuration = DefaultMinimalDuration)
         {
             Formation = formation;
             MinimumDuration = minimumDuration;
             FinishCondition = () => !Formation.Busy;
             StartCondition = () => !Formation.Busy && Formation.Vehicles.Count > 0;
+        }
+
+        public void Abort()
+        {
+            Status = ActionStatus.Aborted;
         }
 
         public override string ToString()

@@ -76,7 +76,10 @@
     <Compile Include="ActionQueue.cs" />
     <Compile Include="ActionSequence.cs" />
     <Compile Include="ActionStatus.cs" />
+    <Compile Include="EnemyFormation.cs" />
+    <Compile Include="FacilityWrapper.cs" />
     <Compile Include="Formation.cs" />
+    <Compile Include="MyFormation.cs" />
     <Compile Include="FormationFactory.cs" />
     <Compile Include="FormationResult.cs" />
     <Compile Include="Global.cs" />

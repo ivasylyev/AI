@@ -5,6 +5,7 @@
         Undefined = 0,
         Pending = 1,
         Executing = 2,
-        Finished  =3
+        Finished = 3,
+        Aborted = 4
     }
 }
