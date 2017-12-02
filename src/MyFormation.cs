@@ -53,6 +53,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return action;
         }
 
+        public override void Update(IEnumerable<VehicleUpdate> updates = null)
+        {
+            base.Update(updates);
+            if (Alive && !Vehicles.Any())
+            {
+                Alive = false;
+            }
+        }
+
         public override string ToString()
         {
             return $"{Type}, Busy:{Busy}, Rect:{Rect}";

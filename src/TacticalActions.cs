@@ -28,6 +28,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             var fighters = Global.MyFighters;
             var helicopters = Global.MyHelicopters;
+            Global.IgnoreCollisionGroupIndexes.Add(fighters.GroupIndex);
+            Global.IgnoreCollisionGroupIndexes.Add(helicopters.GroupIndex);
 
             var isVertical = Math.Abs(fighters.Rect.Left - helicopters.Rect.Left) < eps;
 
@@ -112,6 +114,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 () => Math.Max(f1.Rect.Right, f2.Rect.Right) - compactX,
                 () => Math.Max(f1.Rect.Bottom, f2.Rect.Bottom) - compactY);
 
+            Global.IgnoreCollisionGroupIndexes.Add(res.GroupIndex);
+
             var sShift = new ActionSequence(res.ActionList.ToArray());
             sShift.First().StartCondition = () => sPenetrate2.IsFinished && sPenetrate1.IsFinished;
 
@@ -194,7 +198,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 if (facility.Type == FacilityType.VehicleFactory)
                 {
                     var createdVehicles = Global.MyVehicles.Values
-                        .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect))
+                        .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect) && v.IsStanding)
                         .ToList();
 
                     if (createdVehicles.Count > 30)
@@ -241,23 +245,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static void PauseExecuteAndContinue(MyFormation formation, params Action[] action)
         {
             if (formation != null && formation.Alive && action.Length > 0)
-
             {
-                if (Global.World.TickIndex == 70)
+                var executingAction = formation.ExecutingSequence?.GetExecutingAction();
+                if (executingAction != null && executingAction.ActionType == ActionType.Move)
                 {
-                    var executingAction = formation.ExecutingSequence?.GetExecutingAction();
-                    if (executingAction != null && executingAction.ActionType == ActionType.Move)
-                    {
-                        action.First().StartCondition = () => true;
-                        formation.ExecutingSequence.AddRange(action);
+                    action.First().StartCondition = () => true;
+                    formation.ExecutingSequence.AddRange(action);
 
-                        var continueAction = executingAction.Clone();
-                        continueAction.StartCondition = () =>
-                            action.Last().Status == ActionStatus.Finished ||
-                            action.Last().Status == ActionStatus.Aborted;
-                        formation.ExecutingSequence.Add(continueAction);
-                        executingAction.Abort();
-                    }
+                    var continueAction = executingAction.Clone();
+                    continueAction.StartCondition = () =>
+                        action.Last().Status == ActionStatus.Finished ||
+                        action.Last().Status == ActionStatus.Aborted;
+                    formation.ExecutingSequence.Add(continueAction);
+                    executingAction.Abort();
+                }
+                if (executingAction == null)
+                {
+                    var newSequence = new ActionSequence(action);
+                    Global.ActionQueue.Add(newSequence);
                 }
             }
         }

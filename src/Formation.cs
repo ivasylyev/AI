@@ -16,7 +16,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public VehicleType Type { get; set; }
         public int GroupIndex { get; set; }
-        
+
         public Rect Rect { get; set; }
         public Point MassCenter { get; set; }
         public Point Center => Rect.Center;
@@ -64,6 +64,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public bool IsStanding => !Vehicles.Any() || Vehicles.Values.All(v => v.IsStanding);
 
+        public bool IsAllAeral => Vehicles.Values.All(v => v.IsAerial);
+        public bool IsAllGround => Vehicles.Values.All(v => !v.IsAerial);
+        public bool IsMixed => !IsAllAeral && !IsAllGround;
 
         public virtual void Update(IEnumerable<VehicleUpdate> updates = null)
         {
@@ -77,7 +80,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     }
                 }
             }
-            Rect = new Rect(Vehicles.Values);
+            Rect = Vehicles.Any() ? new Rect(Vehicles.Values) : new Rect(0, 0, 0, 0);
             MassCenter = Vehicles.Any()
                 ? new Point(Vehicles.Values.Average(i => i.X), Vehicles.Values.Average(i => i.Y))
                 : Point.Zero;

@@ -13,6 +13,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static Move Move;
 
         public static readonly Dictionary<int, MyFormation> MyFormations = new Dictionary<int, MyFormation>();
+        public static readonly List<int> IgnoreCollisionGroupIndexes = new List<int>();
         public static readonly Dictionary<int, EnemyFormation> EnemyFormations = new Dictionary<int, EnemyFormation>();
 
         public static readonly Dictionary<long, VehicleWrapper> AllVehicles = new Dictionary<long, VehicleWrapper>();

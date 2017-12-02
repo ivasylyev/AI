@@ -79,17 +79,18 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex == 0)
             {
-                FormationFactory.CreateMyFormation(VehicleType.Fighter);
-                FormationFactory.CreateMyFormation(VehicleType.Helicopter);
-                FormationFactory.CreateMyFormation(VehicleType.Arrv);
-                FormationFactory.CreateMyFormation(VehicleType.Ifv);
-                FormationFactory.CreateMyFormation(VehicleType.Tank);
-
-                FormationFactory.CreateEnemyFormation(VehicleType.Fighter);
-                FormationFactory.CreateEnemyFormation(VehicleType.Helicopter);
                 FormationFactory.CreateEnemyFormation(VehicleType.Arrv);
                 FormationFactory.CreateEnemyFormation(VehicleType.Ifv);
                 FormationFactory.CreateEnemyFormation(VehicleType.Tank);
+                FormationFactory.CreateEnemyFormation(VehicleType.Fighter);
+                FormationFactory.CreateEnemyFormation(VehicleType.Helicopter);
+
+                FormationFactory.CreateMyFormation(VehicleType.Arrv);
+                FormationFactory.CreateMyFormation(VehicleType.Ifv);
+                FormationFactory.CreateMyFormation(VehicleType.Tank);
+                FormationFactory.CreateMyFormation(VehicleType.Fighter);
+                FormationFactory.CreateMyFormation(VehicleType.Helicopter);
+
             }
             foreach (var formation in Global.MyFormations.Values)
             {

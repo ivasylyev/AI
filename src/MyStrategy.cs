@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
@@ -32,27 +33,75 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void LongMoveTest()
         {
-            var formation = Global.MyFighters;
-            if (Global.World.TickIndex == 10)
+            if (Global.World.TickIndex > 50 && Global.World.TickIndex % 20 == 0)
             {
-                ActionSequence sequence = new ActionSequence(formation.MoveCenterTo(300, 300));
-                Global.ActionQueue.Add(sequence);
-            }
-            if (Global.World.TickIndex == 70)
-            {
-                var actionMove = formation.MoveCenterTo(formation.Center.X + 50, formation.Center.Y - 50);
-                var actionScale = formation.ScaleCenter(0.1);
-                TacticalActions.PauseExecuteAndContinue(formation, actionMove, actionScale);
+                List<int> processedKeys = new List<int>();
+                foreach (var key1 in Global.MyFormations.Keys)
+                {
+                    var f1 = Global.MyFormations[key1];
+                    if (f1.Alive && !Global.IgnoreCollisionGroupIndexes.Contains(key1))
+                    {
+                        foreach (var key2 in Global.MyFormations.Keys.Where(k => k != key1))
+                        {
+                            var f2 = Global.MyFormations[key2];
+                            if (f2.Alive && 
+                                !Global.IgnoreCollisionGroupIndexes.Contains(key2) &&
+                                (f1.IsMixed || f2.IsMixed || f1.IsAllAeral ==f2.IsAllAeral)
+                                )
+                            {
+                                var distBetweenCenters = f1.Rect.Center.SqrDistance(f2.Rect.Center);
+                                if (distBetweenCenters < (f1.Rect.SqrDiameter + f2.Rect.SqrDiameter)/2)
+                                {
+                                    var deltaX = f1.Center.X - f2.Center.X;
+                                    var deltaY = f1.Center.Y - f2.Center.Y;
+                                    double l = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                                    deltaX = 20 * deltaX / l;
+                                    deltaY = 20 * deltaY / l;
+
+                                    if (!processedKeys.Contains(key1))
+                                    {
+                                        var move1 = f1.ShiftTo(deltaX, deltaY);
+                                        TacticalActions.PauseExecuteAndContinue(f1, move1);
+                                    }
+                                    if (!processedKeys.Contains(key2))
+                                    {
+                                        var move2 = f2.ShiftTo(-deltaX, -deltaY);
+                                        TacticalActions.PauseExecuteAndContinue(f2, move2);
+                                    }
+                                    processedKeys.Add(key1);
+                                    processedKeys.Add(key2);
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                //                TacticalActions.PauseExecuteAndContinue(formation, actionMove, actionScale);
             }
         }
 
 
         private void OccupyFacilities()
         {
-            if (Global.World.TickIndex % 60 == 0)
+            if (Global.World.TickIndex % 10 == 0)
             {
-                TacticalActions.OccupyFacilities(Global.MyIfvs);
+                foreach (var key1 in Global.MyFormations.Keys)
+                {
+                    foreach (var key2 in Global.MyFormations.Keys.Where(k => k != key1))
+                    {
+                        var f1 = Global.MyFormations[key1];
+                        var f2 = Global.MyFormations[key2];
+                        var distBetweenCenters = f1.Rect.Center.SqrDistance(f2.Rect.Center);
+                        if (distBetweenCenters < (f1.Rect.SqrDiameter + f1.Rect.SqrDiameter) / 2)
+                        {
+                        }
+                    }
+                }
             }
+
+            TacticalActions.OccupyFacilities(Global.MyIfvs);
         }
 
 
@@ -62,7 +111,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 var myFightersCount = Global.MyFighters.Vehicles.Count;
                 var enemyAirCount = Global.EnemyFighters.Vehicles.Count + Global.EnemyHelicopters.Vehicles.Count;
-                VehicleType neededType = myFightersCount < enemyAirCount ? VehicleType.Fighter : VehicleType.Helicopter;
+                var neededType = myFightersCount < enemyAirCount ? VehicleType.Fighter : VehicleType.Helicopter;
 
                 foreach (var facility in Global.MyFacilities)
                 {
@@ -101,12 +150,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 // todo: надо бы предсказывать, куда двигаться
                 var formation = Global.MyFighters;
-                var actionMove = formation.MoveCenterTo((formation.Center.X) / 2 + enemyX, enemyY);
+                var actionMove = formation.MoveCenterTo(formation.Center.X / 2 + enemyX, enemyY);
 
                 if (formation.ExecutingSequence == null)
                 {
                     var actionCompact = formation.ScaleCenter(0.1);
-                    ActionSequence sequence = new ActionSequence(actionCompact, actionMove);
+                    var sequence = new ActionSequence(actionCompact, actionMove);
                     Global.ActionQueue.Add(sequence);
                 }
                 else
