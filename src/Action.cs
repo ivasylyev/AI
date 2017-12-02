@@ -37,6 +37,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public Func<double> GetRight = () => 0;
         public Func<double> GetBottom = () => 0;
 
+        public Move ExecutingMove { get; set; }
+
         public System.Action Callback;
 
         public MyFormation Formation { get; set; }
@@ -55,8 +57,38 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             Formation = formation;
             MinimumDuration = minimumDuration;
-            FinishCondition = () => !Formation.Busy;
-            StartCondition = () => !Formation.Busy && Formation.Vehicles.Count > 0;
+            if (Formation != null)
+            {
+                FinishCondition = () => !Formation.Busy;
+                StartCondition = () => !Formation.Busy && Formation.Vehicles.Count > 0;
+            }
+        }
+
+        public Action Clone()
+        {
+            Action clone = new Action(Formation, MinimumDuration)
+            {
+                ActionType = ActionType,
+                Group = Group,
+                Angle = Angle,
+                Factor = Factor,
+                MaxSpeed = MaxSpeed,
+                MaxAngularSpeed = MaxAngularSpeed,
+                VehicleType = VehicleType,
+                VehicleId = VehicleId,
+                FacilityId = FacilityId,
+                Urgent = Urgent,
+                WaitForWorldTick = WaitForWorldTick,
+                Status = ActionStatus.Pending,
+                GetX = GetX,
+                GetY = GetY,
+                GetLeft = GetLeft,
+                GetTop = GetTop,
+                GetRight = GetRight,
+                GetBottom = GetBottom,
+                Callback = Callback
+            };
+            return clone;
         }
 
         public void Abort()

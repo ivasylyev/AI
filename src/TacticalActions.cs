@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
@@ -6,7 +7,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class TacticalActions
     {
-        public static void CompactGrountFormations()
+        public static void CompactGroundFormations()
         {
             var factor = 0.5;
             Global.ActionQueue.Add(new ActionSequence(Global.MyTanks.ScaleCenter(factor)));
@@ -185,5 +186,78 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
             Global.ActionQueue.Add(sequence);
         }
+
+        public static IEnumerable<MyFormation> CreateProducedFormation()
+        {
+            foreach (var facility in Global.MyFacilities)
+            {
+                if (facility.Type == FacilityType.VehicleFactory)
+                {
+                    var createdVehicles = Global.MyVehicles.Values
+                        .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect))
+                        .ToList();
+
+                    if (createdVehicles.Count > 30)
+
+                    {
+                        var result = FormationFactory.CreateMyFormation(facility.Rect.Left, facility.Rect.Top,
+                            facility.Rect.Right, facility.Rect.Bottom);
+
+                        Global.ActionQueue.Add(new ActionSequence(result.ActionList.ToArray()));
+                        yield return result.Formation;
+                    }
+                }
+            }
+        }
+
+        public static void SetupProductionIfNeed(Facility facility, VehicleType neededType)
+        {
+            if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType != neededType)
+            {
+                ActionSequence sequence = new ActionSequence(facility.SetupProduction(neededType));
+                Global.ActionQueue.Add(sequence);
+            }
+        }
+
+        public static void OccupyFacilities(MyFormation formation)
+        {
+            if (formation.Alive && !formation.Busy)
+            {
+                var freeFacility = Global.World.Facilities
+                    .OrderBy(f => f.Center.SqrDistance(formation.Center))
+                    .FirstOrDefault(f => !f.IsMine && !f.SelectedAsTargetForGroup.HasValue);
+
+                if (freeFacility != null)
+                {
+                    freeFacility.SelectedAsTargetForGroup = formation.GroupIndex;
+
+                    var actionMove = formation.MoveCenterTo(freeFacility.Center);
+                    ActionSequence sequence = new ActionSequence(actionMove);
+                    Global.ActionQueue.Add(sequence);
+                }
+            }
+        }
+
+        public static void PauseExecuteAndContinue(MyFormation formation, Action action)
+        {
+            if (formation!=null && formation.Alive)
+            
+            if (Global.World.TickIndex == 70)
+            {
+                var executingAction = formation?.ExecutingSequence?.GetExecutingAction();
+                if (executingAction != null && executingAction.ActionType == ActionType.Move)
+                {
+                    action.StartCondition = () => true;
+                    formation.ExecutingSequence.Add(action);
+
+                    var continueAction = executingAction.Clone();
+                    continueAction.StartCondition = () =>
+                        action.Status == ActionStatus.Finished || action.Status == ActionStatus.Aborted;
+                    formation.ExecutingSequence.Add(continueAction);
+                    executingAction.Abort();
+                }
+            }
+        }
+
     }
 }

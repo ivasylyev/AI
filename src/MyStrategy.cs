@@ -8,48 +8,54 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
     {
         public void Move(Player me, World world, Game game, Move move)
         {
-            try
+            //try
             {
                 Initializer.Init(me, world, game, move);
 
-                SelectionTest();
+                OccupyFacilities();
 
-                SetupProductionTest();
+                SetupProduction();
 
-                AssignNewGroupTest();
+                AssignNewGroups();
                 //SelectionTest2();
+
+                LongMoveTest();
 
                 Global.ActionQueue.Process();
             }
-            catch (Exception ex)
+//            catch (Exception ex)
+//            {
+//                var exception = ex;
+//            }
+        }
+
+
+        private void LongMoveTest()
+        {
+            var formation = Global.MyFighters;
+            if (Global.World.TickIndex == 10)
             {
-                var exception = ex;
+                ActionSequence sequence = new ActionSequence(formation.MoveCenterTo(300, 300));
+                Global.ActionQueue.Add(sequence);
+            }
+            if (Global.World.TickIndex == 70)
+            {
+                var actionMove = formation.MoveCenterTo(formation.Center.X + 50, formation.Center.Y - 50);
+                TacticalActions.PauseExecuteAndContinue(formation, actionMove);
             }
         }
 
 
-        private void SelectionTest()
+        private void OccupyFacilities()
         {
             if (Global.World.TickIndex % 60 == 0)
             {
-                var formation = Global.MyIfvs;
-
-                var freeFacility = Global.World.Facilities
-                    .OrderBy(f => f.Center.SqrDistance(formation.Center))
-                    .FirstOrDefault(f => !f.IsMine && !f.SelectedAsTargetForGroup.HasValue);
-
-                if (freeFacility != null && !formation.Busy)
-                {
-                    freeFacility.SelectedAsTargetForGroup = formation.GroupIndex;
-
-                    var actionMove = formation.MoveCenterTo(freeFacility.Center);
-                    ActionSequence sequence = new ActionSequence(actionMove);
-                    Global.ActionQueue.Add(sequence);
-                }
+                TacticalActions.OccupyFacilities(Global.MyIfvs);
             }
         }
 
-        private void SetupProductionTest()
+
+        private void SetupProduction()
         {
             if (Global.World.TickIndex % 10 == 0)
             {
@@ -59,41 +65,23 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 foreach (var facility in Global.MyFacilities)
                 {
-                    if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType != neededType)
-                    {
-                        ActionSequence sequence = new ActionSequence(facility.SetupProduction(neededType));
-                        Global.ActionQueue.Add(sequence);
-                    }
+                    TacticalActions.SetupProductionIfNeed(facility, neededType);
                 }
             }
         }
 
-        private void AssignNewGroupTest()
+        private void AssignNewGroups()
         {
             if (Global.World.TickIndex % 120 == 0)
             {
-                foreach (var facility in Global.MyFacilities)
+                var formations = TacticalActions.CreateProducedFormation();
+
+                foreach (var formation in formations)
                 {
-                    if (facility.Type == FacilityType.VehicleFactory)
-                    {
-                        var createdVehicles = Global.MyVehicles.Values
-                            .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect))
-                            .ToList();
-
-                        if (createdVehicles.Count > 22)
-
-                        {
-                            var result = FormationFactory.CreateMyFormation(facility.Rect.Left, facility.Rect.Top,
-                                facility.Rect.Right, facility.Rect.Bottom);
-
-                            // todo: давать правильную команду 
-                            var sequence = new ActionSequence(result.ActionList.ToArray())
-                            {
-                                result.Formation.MoveCenterTo(Global.EnemyArrvs.Center.X, Global.EnemyArrvs.Center.Y)
-                            };
-                            Global.ActionQueue.Add(sequence);
-                        }
-                    }
+                    // todo: давать правильную команду 
+                    var action = formation.MoveCenterTo(Global.EnemyArrvs.Center.X, Global.EnemyArrvs.Center.Y);
+                    var sequence = new ActionSequence(action);
+                    Global.ActionQueue.Add(sequence);
                 }
             }
         }

@@ -127,6 +127,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                             Global.SelectedFormation = action.Formation;
                         }
                     }
+                    action.ExecutingMove = move;
                 }
 
                 action.Status = ActionStatus.Executing;
