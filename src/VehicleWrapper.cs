@@ -30,6 +30,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public int RemainingAttackCooldownTicks { get; set; }
         public bool IsAerial { get; set; }
         public bool IsSelected { get; set; }
+        public int[] Groups { get; set; }
 
 
         public Point Speed => new Point(SpeedX, SpeedY);
@@ -66,7 +67,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 AttackCooldownTicks = vehicle.AttackCooldownTicks,
                 RemainingAttackCooldownTicks = vehicle.RemainingAttackCooldownTicks,
                 IsAerial = vehicle.IsAerial,
-                IsSelected = vehicle.IsSelected
+                IsSelected = vehicle.IsSelected,
+                Groups = vehicle.Groups?? new int[0]
             };
             for (var i = 0; i < HistoryLength; i++)
             {
@@ -81,7 +83,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             X = vehicleUpdate.X;
             Y = vehicleUpdate.Y;
+            Groups = vehicleUpdate.Groups ?? new int[0];
             Durability = vehicleUpdate.Durability;
+            IsSelected = vehicleUpdate.IsSelected;
+            RemainingAttackCooldownTicks = vehicleUpdate.RemainingAttackCooldownTicks;
 
             Update();
         }

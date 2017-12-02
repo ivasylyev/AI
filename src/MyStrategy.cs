@@ -15,6 +15,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 SelectionTest();
 
                 SetupProductionTest();
+
+                AssignNewGroupTest();
                 //SelectionTest2();
 
                 Global.ActionQueue.Process();
@@ -30,7 +32,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex % 60 == 0)
             {
-                var formation = Global.MyArrvs;
+                var formation = Global.MyIfvs;
 
                 var freeFacility = Global.World.Facilities
                     .OrderBy(f => f.Center.SqrDistance(formation.Center))
@@ -68,12 +70,29 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void AssignNewGroupTest()
         {
-            if (Global.World.TickIndex % 10 == 0)
+            if (Global.World.TickIndex % 120 == 0)
             {
                 foreach (var facility in Global.MyFacilities)
                 {
-                    if (facility.Type == FacilityType.VehicleFactory )
+                    if (facility.Type == FacilityType.VehicleFactory)
                     {
+                        var createdVehicles = Global.MyVehicles.Values
+                            .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect))
+                            .ToList();
+
+                        if (createdVehicles.Count > 22)
+
+                        {
+                            var result = FormationFactory.CreateMyFormation(facility.Rect.Left, facility.Rect.Top,
+                                facility.Rect.Right, facility.Rect.Bottom);
+
+                            // todo: давать правильную команду 
+                            var sequence = new ActionSequence(result.ActionList.ToArray())
+                            {
+                                result.Formation.MoveCenterTo(Global.EnemyArrvs.Center.X, Global.EnemyArrvs.Center.Y)
+                            };
+                            Global.ActionQueue.Add(sequence);
+                        }
                     }
                 }
             }

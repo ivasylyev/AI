@@ -87,7 +87,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 GetLeft = left,
                 GetTop = top,
                 GetRight = right,
-                GetBottom = bottom
+                GetBottom = bottom,
             };
             selectAction.Callback = () =>
             {
@@ -109,7 +109,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var assignAction = new Action
             {
                 ActionType = ActionType.Assign,
-                Group = groupIndex
+                Group = groupIndex,
+                Urgent = true
             };
             assignAction.Callback = () =>
             {
