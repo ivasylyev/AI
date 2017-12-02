@@ -41,7 +41,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex == 70)
             {
                 var actionMove = formation.MoveCenterTo(formation.Center.X + 50, formation.Center.Y - 50);
-                TacticalActions.PauseExecuteAndContinue(formation, actionMove);
+                var actionScale = formation.ScaleCenter(0.1);
+                TacticalActions.PauseExecuteAndContinue(formation, actionMove, actionScale);
             }
         }
 

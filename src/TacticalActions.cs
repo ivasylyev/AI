@@ -214,7 +214,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType != neededType)
             {
-                ActionSequence sequence = new ActionSequence(facility.SetupProduction(neededType));
+                var sequence = new ActionSequence(facility.SetupProduction(neededType));
                 Global.ActionQueue.Add(sequence);
             }
         }
@@ -232,32 +232,34 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     freeFacility.SelectedAsTargetForGroup = formation.GroupIndex;
 
                     var actionMove = formation.MoveCenterTo(freeFacility.Center);
-                    ActionSequence sequence = new ActionSequence(actionMove);
+                    var sequence = new ActionSequence(actionMove);
                     Global.ActionQueue.Add(sequence);
                 }
             }
         }
 
-        public static void PauseExecuteAndContinue(MyFormation formation, Action action)
+        public static void PauseExecuteAndContinue(MyFormation formation, params Action[] action)
         {
-            if (formation!=null && formation.Alive)
-            
-            if (Global.World.TickIndex == 70)
-            {
-                var executingAction = formation?.ExecutingSequence?.GetExecutingAction();
-                if (executingAction != null && executingAction.ActionType == ActionType.Move)
-                {
-                    action.StartCondition = () => true;
-                    formation.ExecutingSequence.Add(action);
+            if (formation != null && formation.Alive && action.Length > 0)
 
-                    var continueAction = executingAction.Clone();
-                    continueAction.StartCondition = () =>
-                        action.Status == ActionStatus.Finished || action.Status == ActionStatus.Aborted;
-                    formation.ExecutingSequence.Add(continueAction);
-                    executingAction.Abort();
+            {
+                if (Global.World.TickIndex == 70)
+                {
+                    var executingAction = formation.ExecutingSequence?.GetExecutingAction();
+                    if (executingAction != null && executingAction.ActionType == ActionType.Move)
+                    {
+                        action.First().StartCondition = () => true;
+                        formation.ExecutingSequence.AddRange(action);
+
+                        var continueAction = executingAction.Clone();
+                        continueAction.StartCondition = () =>
+                            action.Last().Status == ActionStatus.Finished ||
+                            action.Last().Status == ActionStatus.Aborted;
+                        formation.ExecutingSequence.Add(continueAction);
+                        executingAction.Abort();
+                    }
                 }
             }
         }
-
     }
 }
