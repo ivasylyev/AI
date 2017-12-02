@@ -6,6 +6,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class TacticalActions
     {
+        public static void CompactGrountFormations()
+        {
+            var factor = 0.5;
+            Global.ActionQueue.Add(new ActionSequence(Global.MyTanks.ScaleCenter(factor)));
+            Global.ActionQueue.Add(new ActionSequence(Global.MyArrvs.ScaleCenter(factor)));
+            Global.ActionQueue.Add(new ActionSequence(Global.MyIfvs.ScaleCenter(factor)));
+        }
+
         public static MyFormation CreateAirFormation()
         {
             const double eps = 10D;
