@@ -24,6 +24,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public long VehicleId { get; set; } = -1L;
 
         public bool Urgent { get; set; }
+        public bool Interruptable { get; set; } = true;
         public int WaitForWorldTick { get; set; }
         public ActionStatus Status { get; set; } = ActionStatus.Pending;
 

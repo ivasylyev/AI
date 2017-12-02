@@ -32,6 +32,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
         }
+        public bool HasActionsFor(Facility facility)
+        {
+            return _internalQueue.Any(sequence => sequence.Any(a => a.FacilityId == facility.Id));
+        }
 
         public void Update()
         {

@@ -218,8 +218,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType != neededType)
             {
-                var sequence = new ActionSequence(facility.SetupProduction(neededType));
-                Global.ActionQueue.Add(sequence);
+                if (!Global.ActionQueue.HasActionsFor(facility))
+                {
+                    var sequence = new ActionSequence(facility.SetupProduction(neededType));
+                    Global.ActionQueue.Add(sequence);
+                }
             }
         }
 
@@ -247,7 +250,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (formation != null && formation.Alive && action.Length > 0)
             {
                 var executingAction = formation.ExecutingSequence?.GetExecutingAction();
-                if (executingAction != null && executingAction.ActionType == ActionType.Move)
+                if (executingAction != null && executingAction.ActionType == ActionType.Move &&
+                    executingAction.Interruptable)
                 {
                     action.First().StartCondition = () => true;
                     formation.ExecutingSequence.AddRange(action);
@@ -263,6 +267,54 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     var newSequence = new ActionSequence(action);
                     Global.ActionQueue.Add(newSequence);
+                }
+            }
+        }
+
+        public static void Anticollision()
+        {
+            List<int> processedKeys = new List<int>();
+            foreach (var key1 in Global.MyFormations.Keys)
+            {
+                var f1 = Global.MyFormations[key1];
+                if (f1.Alive && !Global.IgnoreCollisionGroupIndexes.Contains(key1))
+                {
+                    foreach (var key2 in Global.MyFormations.Keys.Where(k => k != key1))
+                    {
+                        var f2 = Global.MyFormations[key2];
+                        if (f2.Alive &&
+                            !Global.IgnoreCollisionGroupIndexes.Contains(key2) &&
+                            (f1.IsMixed || f2.IsMixed || f1.IsAllAeral == f2.IsAllAeral))
+                        {
+                            var distBetweenCenters = f1.Rect.Center.SqrDistance(f2.Rect.Center);
+                            if (distBetweenCenters < (f1.Rect.SqrDiameter + f2.Rect.SqrDiameter) / 2)
+                            {
+                                var deltaX = f1.Center.X - f2.Center.X;
+                                var deltaY = f1.Center.Y - f2.Center.Y;
+                                double l = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                                deltaX = 20 * deltaX / l;
+                                deltaY = 20 * deltaY / l;
+
+                                if (!processedKeys.Contains(key1))
+                                {
+                                    var move1 = f1.ShiftTo(deltaX, deltaY);
+                                    move1.Interruptable = false;
+
+                                    PauseExecuteAndContinue(f1, move1);
+                                }
+                                if (!processedKeys.Contains(key2))
+                                {
+                                    var move2 = f2.ShiftTo(-deltaX, -deltaY);
+                                    move2.Interruptable = false;
+
+                                    PauseExecuteAndContinue(f2, move2);
+                                }
+                                processedKeys.Add(key1);
+                                processedKeys.Add(key2);
+                            }
+                        }
+                    }
                 }
             }
         }
