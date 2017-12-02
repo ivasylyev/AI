@@ -51,18 +51,34 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex % 10 == 0)
             {
-                var capturedFacilities = Global.World.Facilities.Where(f => f.IsMine);
-                foreach (var facility in capturedFacilities)
+                var myFightersCount = Global.MyFighters.Vehicles.Count;
+                var enemyAirCount = Global.EnemyFighters.Vehicles.Count + Global.EnemyHelicopters.Vehicles.Count;
+                VehicleType neededType = myFightersCount < enemyAirCount ? VehicleType.Fighter : VehicleType.Helicopter;
+
+                foreach (var facility in Global.MyFacilities)
                 {
-                    facility.SelectedAsTargetForGroup = null;
-                    if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType == null)
+                    if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType != neededType)
                     {
-                        ActionSequence sequence = new ActionSequence(facility.SetupProduction(VehicleType.Fighter));
+                        ActionSequence sequence = new ActionSequence(facility.SetupProduction(neededType));
                         Global.ActionQueue.Add(sequence);
                     }
                 }
             }
         }
+
+        private void AssignNewGroupTest()
+        {
+            if (Global.World.TickIndex % 10 == 0)
+            {
+                foreach (var facility in Global.MyFacilities)
+                {
+                    if (facility.Type == FacilityType.VehicleFactory )
+                    {
+                    }
+                }
+            }
+        }
+
 
         private void SelectionTest2()
         {

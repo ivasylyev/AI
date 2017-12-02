@@ -14,6 +14,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             UpdateFormations();
 
+            UpdateFacilies();
+
             Global.ActionQueue.Update();
 
             if (Global.World.TickIndex == 0)
@@ -96,6 +98,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             foreach (var formation in Global.EnemyFormations.Values)
             {
                 formation.Update(Global.World.VehicleUpdates);
+            }
+        }
+
+        private static void UpdateFacilies()
+        {
+            foreach (var facility in Global.MyFacilities)
+            {
+                facility.SelectedAsTargetForGroup = null;
             }
         }
     }
