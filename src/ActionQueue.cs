@@ -32,6 +32,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
         }
+
         public bool HasActionsFor(Facility facility)
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.FacilityId == facility.Id));
@@ -54,6 +55,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public void Process()
         {
+            _internalQueue.RemoveAll(s => s.IsFinished);
             if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
             {
                 var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.ReadyToStart);
@@ -98,53 +100,44 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 return;
             }
 
-            try
-            {
-                if (action.WaitForWorldTick > 0)
-                {
-                    _wait = action.WaitForWorldTick;
-                }
-                else
-                {
-                    move.Action = action.ActionType;
-                    move.X = action.GetX();
-                    move.Y = action.GetY();
-                    move.Group = action.Group;
-                    move.Angle = action.Angle;
-                    move.Left = action.GetLeft();
-                    move.Top = action.GetTop();
-                    move.Right = action.GetRight();
-                    move.Bottom = action.GetBottom();
-                    move.VehicleType = action.VehicleType;
-                    move.MaxSpeed = action.MaxSpeed;
-                    move.MaxAngularSpeed = action.MaxAngularSpeed;
-                    move.Factor = action.Factor;
-                    move.FacilityId = action.FacilityId;
-                    move.VehicleId = action.VehicleId;
 
-                    if (action.Formation != null)
+            if (action.WaitForWorldTick > 0)
+            {
+                _wait = action.WaitForWorldTick;
+            }
+            else
+            {
+                move.Action = action.ActionType;
+                move.X = action.GetX();
+                move.Y = action.GetY();
+                move.Group = action.Group;
+                move.Angle = action.Angle;
+                move.Left = action.GetLeft();
+                move.Top = action.GetTop();
+                move.Right = action.GetRight();
+                move.Bottom = action.GetBottom();
+                move.VehicleType = action.VehicleType;
+                move.MaxSpeed = action.MaxSpeed;
+                move.MaxAngularSpeed = action.MaxAngularSpeed;
+                move.Factor = action.Factor;
+                move.FacilityId = action.FacilityId;
+                move.VehicleId = action.VehicleId;
+
+                if (action.Formation != null)
+                {
+                    action.Formation.ExecutingAction = action;
+                    action.Formation.ExecutingSequence = sequence;
+                    if (action.ActionType == ActionType.ClearAndSelect)
                     {
-                        action.Formation.ExecutingAction = action;
-                        action.Formation.ExecutingSequence = sequence;
-                        if (action.ActionType == ActionType.ClearAndSelect)
-                        {
-                            Global.SelectedFormation = action.Formation;
-                        }
+                        Global.SelectedFormation = action.Formation;
                     }
-                    action.ExecutingMove = move;
                 }
+                action.ExecutingMove = move;
+            }
 
-                action.Status = ActionStatus.Executing;
-                action.Callback?.Invoke();
-                Console.WriteLine($"Action:{action}");
-            }
-            finally
-            {
-                if (sequence.IsFinished)
-                {
-                    _internalQueue.Remove(sequence);
-                }
-            }
+            action.Status = ActionStatus.Executing;
+            action.Callback?.Invoke();
+            Console.WriteLine($"Action:{action}");
         }
     }
 }

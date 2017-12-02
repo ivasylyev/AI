@@ -19,7 +19,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             const double eps = 10D;
             const double deltaShift = 5.1D;
-            const double commonCoordinate = 250D;
+            const double commonCoordinate = 300D;
             const double nearCoordinate = 60D;
             const double farCoordinate = 200D;
             const double factor = 1.7D;
@@ -284,7 +284,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         var f2 = Global.MyFormations[key2];
                         if (f2.Alive &&
                             !Global.IgnoreCollisionGroupIndexes.Contains(key2) &&
-                            (f1.IsMixed || f2.IsMixed || f1.IsAllAeral == f2.IsAllAeral))
+                            (f1.IsMixed || f2.IsMixed || f1.IsAllAeral == f2.IsAllAeral)                        )
                         {
                             var distBetweenCenters = f1.Rect.Center.SqrDistance(f2.Rect.Center);
                             if (distBetweenCenters < (f1.Rect.SqrDiameter + f2.Rect.SqrDiameter) / 2)

@@ -1,4 +1,5 @@
-﻿using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
+﻿using System.Linq;
+using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
@@ -17,6 +18,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 SetupProduction();
 
                 AssignNewGroups();
+
+                FollowTest();
 
                 Global.ActionQueue.Process();
             }
@@ -69,7 +72,23 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 foreach (var formation in formations)
                 {
                     // todo: давать правильную команду 
-                    var action = formation.MoveCenterTo(Global.EnemyArrvs.Center.X, Global.EnemyArrvs.Center.Y);
+
+                    var enemyFormation = Global.EnemyArrvs.Vehicles.Any()? Global.EnemyArrvs: Global.EnemyHelicopters;
+                    var action = formation.MoveCenterTo(enemyFormation.Center.X, enemyFormation.Center.Y);
+                    
+                    var sequence = new ActionSequence(action);
+                    Global.ActionQueue.Add(sequence);
+                }
+            }
+        }
+
+        private void FollowTest()
+        {
+            if (Global.World.TickIndex % 120 == 0)
+            {
+                if (Global.MyAirFormation.Alive)
+                {
+                    var action = Global.MyArrvs.MoveCenterTo(Global.MyAirFormation.Center);
                     var sequence = new ActionSequence(action);
                     Global.ActionQueue.Add(sequence);
                 }

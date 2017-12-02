@@ -20,7 +20,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             if (Global.World.TickIndex == 0)
             {
-              //  Global.MyAirFormation = TacticalActions.CreateAirFormation();
+                Global.MyAirFormation = TacticalActions.CreateAirFormation();
                 TacticalActions.CompactGroundFormations();
             }
         }
