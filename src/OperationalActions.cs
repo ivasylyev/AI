@@ -1,7 +1,20 @@
-﻿namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
+﻿using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
+
+namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class OperationalActions
     {
+        public static Action SetupProduction(this Facility facility, VehicleType type)
+        {
+            var action = new Action
+            {
+                ActionType = ActionType.SetupVehicleProduction,
+                FacilityId = facility.Id,
+                VehicleType = type
+            };
+            return action;
+        }
+
         public static Action MoveCenterTo(this MyFormation formation, Point point, double maxSpeed = 10)
         {
             return MoveCenterTo(formation, point.X, point.Y);
@@ -12,7 +25,7 @@
         {
             var action = new Action(formation)
             {
-                ActionType = Model.ActionType.Move,
+                ActionType = ActionType.Move,
                 GetX = () => x - formation.MassCenter.X,
                 GetY = () => y - formation.MassCenter.Y,
                 MaxSpeed = maxSpeed
@@ -31,7 +44,7 @@
             {
                 GetX = () => x - formation.Rect.Left,
                 GetY = () => y - formation.Rect.Top,
-                ActionType = Model.ActionType.Move,
+                ActionType = ActionType.Move,
                 MaxSpeed = maxSpeed
             };
             return action;
@@ -41,7 +54,7 @@
         {
             var action = new Action(formation)
             {
-                ActionType = Model.ActionType.Move,
+                ActionType = ActionType.Move,
                 GetX = () => x,
                 GetY = () => y,
                 MaxSpeed = maxSpeed
@@ -53,10 +66,10 @@
         {
             var action = new Action(formation)
             {
-                ActionType = Model.ActionType.Scale,
+                ActionType = ActionType.Scale,
                 Factor = factor,
                 GetX = () => formation.MassCenter.X,
-                GetY = () => formation.MassCenter.Y,
+                GetY = () => formation.MassCenter.Y
             };
             return action;
         }
@@ -65,10 +78,10 @@
         {
             var action = new Action(formation)
             {
-                ActionType = Model.ActionType.Scale,
+                ActionType = ActionType.Scale,
                 Factor = factor,
                 GetX = () => formation.Rect.Left,
-                GetY = () => formation.Rect.Top,
+                GetY = () => formation.Rect.Top
             };
             return action;
         }
@@ -77,10 +90,10 @@
         {
             var action = new Action(formation)
             {
-                ActionType = Model.ActionType.Rotate,
+                ActionType = ActionType.Rotate,
                 Angle = angle,
                 GetX = () => formation.MassCenter.X,
-                GetY = () => formation.MassCenter.Y,
+                GetY = () => formation.MassCenter.Y
             };
             return action;
         }

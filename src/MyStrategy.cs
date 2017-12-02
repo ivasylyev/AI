@@ -13,6 +13,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Initializer.Init(me, world, game, move);
 
                 SelectionTest();
+
+                SetupProductionTest();
                 //SelectionTest2();
 
                 Global.ActionQueue.Process();
@@ -39,8 +41,25 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     freeFacility.SelectedAsTargetForGroup = formation.GroupIndex;
 
                     var actionMove = formation.MoveCenterTo(freeFacility.Center);
-                    ActionSequence sequence = new ActionSequence( actionMove);
+                    ActionSequence sequence = new ActionSequence(actionMove);
                     Global.ActionQueue.Add(sequence);
+                }
+            }
+        }
+
+        private void SetupProductionTest()
+        {
+            if (Global.World.TickIndex % 10 == 0)
+            {
+                var capturedFacilities = Global.World.Facilities.Where(f => f.IsMine);
+                foreach (var facility in capturedFacilities)
+                {
+                    facility.SelectedAsTargetForGroup = null;
+                    if (facility.Type == FacilityType.VehicleFactory && facility.VehicleType == null)
+                    {
+                        ActionSequence sequence = new ActionSequence(facility.SetupProduction(VehicleType.Fighter));
+                        Global.ActionQueue.Add(sequence);
+                    }
                 }
             }
         }
