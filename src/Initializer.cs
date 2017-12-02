@@ -85,12 +85,16 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 FormationFactory.CreateEnemyFormation(VehicleType.Fighter);
                 FormationFactory.CreateEnemyFormation(VehicleType.Helicopter);
 
-                FormationFactory.CreateMyFormation(VehicleType.Arrv);
-                FormationFactory.CreateMyFormation(VehicleType.Ifv);
-                FormationFactory.CreateMyFormation(VehicleType.Tank);
-                FormationFactory.CreateMyFormation(VehicleType.Fighter);
-                FormationFactory.CreateMyFormation(VehicleType.Helicopter);
-
+                Global.ActionQueue.Add(new ActionSequence(
+                    FormationFactory.CreateMyFormation(VehicleType.Arrv).ActionList.ToArray()));
+                Global.ActionQueue.Add(new ActionSequence(
+                    FormationFactory.CreateMyFormation(VehicleType.Ifv).ActionList.ToArray()));
+                Global.ActionQueue.Add(new ActionSequence(
+                    FormationFactory.CreateMyFormation(VehicleType.Tank).ActionList.ToArray()));
+                Global.ActionQueue.Add(new ActionSequence(
+                    FormationFactory.CreateMyFormation(VehicleType.Fighter).ActionList.ToArray()));
+                Global.ActionQueue.Add(new ActionSequence(
+                    FormationFactory.CreateMyFormation(VehicleType.Helicopter).ActionList.ToArray()));
             }
             foreach (var formation in Global.MyFormations.Values)
             {

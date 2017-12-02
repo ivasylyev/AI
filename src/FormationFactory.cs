@@ -11,7 +11,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             var formation = new EnemyFormation
             {
-                GroupIndex = -(int) type,
+                GroupIndex = 1 + (int) type,
                 Type = type
             };
 
@@ -28,27 +28,31 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return formation;
         }
 
-        public static MyFormation CreateMyFormation(VehicleType type)
+        public static FormationResult CreateMyFormation(VehicleType type)
         {
             var formation = new MyFormation
             {
-                GroupIndex = -(int) type,
+                GroupIndex = 1 + (int) type,
+                Alive = false,
                 Type = type
             };
 
-            foreach (var keyVal in Global.MyVehicles)
-            {
-                if (keyVal.Value.Type == type)
-                {
-                    formation.Vehicles.Add(keyVal.Key, keyVal.Value);
-                }
-            }
+            var left = Global.MyVehicles.Values.Where(v => v.Type == type).Min(v => v.X);
+            var top = Global.MyVehicles.Values.Where(v => v.Type == type).Min(v => v.Y);
+            var right = Global.MyVehicles.Values.Where(v => v.Type == type).Max(v => v.X);
+            var bottom = Global.MyVehicles.Values.Where(v => v.Type == type).Max(v => v.Y);
 
-            formation.Update();
+            var list = SelectAndAssignVehicles(formation, () => left, () => top, () => right, () => bottom,
+                formation.GroupIndex);
 
             Global.MyFormations.Add(formation.GroupIndex, formation);
-            formation.Alive = true;
-            return formation;
+
+            return new FormationResult
+            {
+                Formation = formation,
+                GroupIndex = formation.GroupIndex,
+                ActionList = list
+            };
         }
 
         public static FormationResult CreateMyFormation(double left, double top, double right, double bottom)

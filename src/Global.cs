@@ -23,17 +23,17 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static IEnumerable<Facility> MyFacilities => World?.Facilities.Where(f => f.IsMine);
 
-        public static MyFormation MyFighters => MyFormations[-(int) VehicleType.Fighter];
-        public static MyFormation MyHelicopters => MyFormations[-(int) VehicleType.Helicopter];
-        public static MyFormation MyArrvs => MyFormations[-(int) VehicleType.Arrv];
-        public static MyFormation MyIfvs => MyFormations[-(int) VehicleType.Ifv];
-        public static MyFormation MyTanks => MyFormations[-(int) VehicleType.Tank];
+        public static MyFormation MyFighters => MyFormations[1 + (int) VehicleType.Fighter];
+        public static MyFormation MyHelicopters => MyFormations[1 + (int) VehicleType.Helicopter];
+        public static MyFormation MyArrvs => MyFormations[1 + (int) VehicleType.Arrv];
+        public static MyFormation MyIfvs => MyFormations[1 + (int) VehicleType.Ifv];
+        public static MyFormation MyTanks => MyFormations[1 + (int) VehicleType.Tank];
 
-        public static EnemyFormation EnemyFighters => EnemyFormations[-(int) VehicleType.Fighter];
-        public static EnemyFormation EnemyHelicopters => EnemyFormations[-(int) VehicleType.Helicopter];
-        public static EnemyFormation EnemyArrvs => EnemyFormations[-(int) VehicleType.Arrv];
-        public static EnemyFormation EnemyIfvs => EnemyFormations[-(int) VehicleType.Ifv];
-        public static EnemyFormation EnemyTanks => EnemyFormations[-(int) VehicleType.Tank];
+        public static EnemyFormation EnemyFighters => EnemyFormations[1 + (int) VehicleType.Fighter];
+        public static EnemyFormation EnemyHelicopters => EnemyFormations[1 + (int) VehicleType.Helicopter];
+        public static EnemyFormation EnemyArrvs => EnemyFormations[1 + (int) VehicleType.Arrv];
+        public static EnemyFormation EnemyIfvs => EnemyFormations[1 + (int) VehicleType.Ifv];
+        public static EnemyFormation EnemyTanks => EnemyFormations[1 + (int) VehicleType.Tank];
 
         public static MyFormation SelectedFormation;
         public static MyFormation MyAirFormation;
