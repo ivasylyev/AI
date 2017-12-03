@@ -7,7 +7,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public class ActionQueue
     {
-        private static int _wait = -1;
         private readonly List<ActionSequence> _internalQueue = new List<ActionSequence>();
 
         public void Add(ActionSequence sequence)
@@ -20,20 +19,19 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     if (_internalQueue.Any(s => s.Any(a => a.IsAnticollision &&
                                                            a.Formation == action.Formation &&
-                                                           a.Status == ActionStatus.Pending || a.Status == ActionStatus.Executing)))
+                                                           a.Status == ActionStatus.Pending ||
+                                                           a.Status == ActionStatus.Executing)))
                     {
                         action.Status = ActionStatus.Aborted;
                         return;
                     }
                 }
-
-                bool FindInterruptableAction(Action a) => a.Interruptable &&
-                                             a.ActionType == ActionType.Move &&
-                                             a.Formation == action.Formation &&
-                                             a.Status == ActionStatus.Pending;
-
-                var oldSequence = _internalQueue.LastOrDefault(s => s.Any(FindInterruptableAction));
-                var actionToReplace = oldSequence?.LastOrDefault(FindInterruptableAction);
+                Func<Action, bool> replacePredicate = a => a.Interruptable &&
+                                                    a.ActionType == ActionType.Move &&
+                                                    a.Formation == action.Formation &&
+                                                    a.Status == ActionStatus.Pending;
+                var oldSequence = _internalQueue.LastOrDefault(s => s.Any(replacePredicate));
+                var actionToReplace = oldSequence?.LastOrDefault(replacePredicate);
                 actionToReplace?.Abort();
             }
             _internalQueue.Add(sequence);
@@ -42,14 +40,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 action.Status = ActionStatus.Pending;
             }
-        }
-
-
-        public int WaitTicks(int ticks)
-        {
-            var action = new Action {WaitForWorldTick = Global.World.TickIndex + ticks};
-            Add(new ActionSequence(action));
-            return action.WaitForWorldTick;
         }
 
         public bool HasActionsFor(MyFormation formation)
@@ -80,40 +70,44 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public void Process()
         {
             _internalQueue.RemoveAll(s => s.IsFinished);
-            if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
+            foreach (var sequence in _internalQueue)
             {
-                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.ReadyToStart);
-                if (sequence != null)
+                foreach (var action in sequence)
                 {
-                    var action = sequence.GetPendingAction();
-                    Execute(sequence, action, Global.Move);
-                    return;
-                }
-
-                if (Global.World.TickIndex >= _wait)
-                {
-                    sequence = _internalQueue.Where(s => s.ReadyToStart).ToList().FirstOrDefault();
-                    if (sequence != null)
+                    if (Global.World.TickIndex == action.AbortAtWorldTick)
                     {
-                        _wait = -1;
-
-                        var action = sequence.GetPendingAction();
-                        if (action.Formation != null)
-                        {
-                            if (Global.SelectedFormation != action.Formation)
-                            {
-                                action.Urgent = true;
-                                action = action.Formation.GetSelectionAction();
-                            }
-                            else
-                            {
-                                action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
-                            }
-                        }
-                        Execute(sequence, action, Global.Move);
+                        action.Abort();
                     }
                 }
             }
+            if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
+            {
+                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.ReadyToStart) ??
+                               _internalQueue.FirstOrDefault(s => s.ReadyToStart);
+                if (sequence != null)
+                {
+                    var action = sequence.GetPendingAction();
+                    action = GetActionOrSelectedActionIfNeeded(action);
+                    Execute(sequence, action, Global.Move);
+                }
+            }
+        }
+
+        private static Action GetActionOrSelectedActionIfNeeded(Action action)
+        {
+            if (action.Formation != null)
+            {
+                if (Global.SelectedFormation != action.Formation)
+                {
+                    action.Urgent = true;
+                    action = action.Formation.GetSelectionAction();
+                }
+                else
+                {
+                    action.Formation.WaitUntilIndex = Global.World.TickIndex + action.MinimumDuration;
+                }
+            }
+            return action;
         }
 
 
@@ -125,39 +119,33 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
 
 
-            if (action.WaitForWorldTick > 0)
-            {
-                _wait = action.WaitForWorldTick;
-            }
-            else
-            {
-                move.Action = action.ActionType;
-                move.X = action.GetX();
-                move.Y = action.GetY();
-                move.Group = action.Group;
-                move.Angle = action.Angle;
-                move.Left = action.GetLeft();
-                move.Top = action.GetTop();
-                move.Right = action.GetRight();
-                move.Bottom = action.GetBottom();
-                move.VehicleType = action.VehicleType;
-                move.MaxSpeed = action.MaxSpeed;
-                move.MaxAngularSpeed = action.MaxAngularSpeed;
-                move.Factor = action.Factor;
-                move.FacilityId = action.FacilityId;
-                move.VehicleId = action.VehicleId;
+            move.Action = action.ActionType;
+            move.X = action.GetX();
+            move.Y = action.GetY();
+            move.Group = action.Group;
+            move.Angle = action.Angle;
+            move.Left = action.GetLeft();
+            move.Top = action.GetTop();
+            move.Right = action.GetRight();
+            move.Bottom = action.GetBottom();
+            move.VehicleType = action.VehicleType;
+            move.MaxSpeed = action.MaxSpeed;
+            move.MaxAngularSpeed = action.MaxAngularSpeed;
+            move.Factor = action.Factor;
+            move.FacilityId = action.FacilityId;
+            move.VehicleId = action.VehicleId;
 
-                if (action.Formation != null)
+            if (action.Formation != null)
+            {
+                action.Formation.ExecutingAction = action;
+                action.Formation.ExecutingSequence = sequence;
+                if (action.ActionType == ActionType.ClearAndSelect)
                 {
-                    action.Formation.ExecutingAction = action;
-                    action.Formation.ExecutingSequence = sequence;
-                    if (action.ActionType == ActionType.ClearAndSelect)
-                    {
-                        Global.SelectedFormation = action.Formation;
-                    }
+                    Global.SelectedFormation = action.Formation;
                 }
-                action.ExecutingMove = move;
             }
+            action.ExecutingMove = move;
+
 
             action.Status = ActionStatus.Executing;
             action.Callback?.Invoke();

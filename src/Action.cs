@@ -26,7 +26,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public bool Urgent { get; set; }
         public bool Interruptable { get; set; } = true;
         public bool IsAnticollision { get; set; }
-        public int WaitForWorldTick { get; set; }
+        
+        public int AbortAtWorldTick { get; set; } = -1;
         public ActionStatus Status { get; set; } = ActionStatus.Pending;
 
         public Func<bool> StartCondition;
@@ -80,7 +81,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 VehicleId = VehicleId,
                 FacilityId = FacilityId,
                 Urgent = Urgent,
-                WaitForWorldTick = WaitForWorldTick,
                 Status = ActionStatus.Pending,
                 GetX = GetX,
                 GetY = GetY,

@@ -1,4 +1,5 @@
-﻿using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
@@ -70,6 +71,17 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Factor = factor,
                 GetX = () => formation.MassCenter.X,
                 GetY = () => formation.MassCenter.Y
+            };
+            return action;
+        }
+        public static Action ScalePoint(this MyFormation formation, Point point, double factor)
+        {
+            var action = new Action(formation)
+            {
+                ActionType = ActionType.Scale,
+                Factor = factor,
+                GetX = () => point.X,
+                GetY = () => point.Y
             };
             return action;
         }

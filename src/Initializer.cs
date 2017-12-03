@@ -11,10 +11,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             InitGlobal(me, world, game, move);
 
             CreateVehicles();
-
             UpdateVehicles();
-
-            UpdateFacilies();
 
             Global.Map.Update();
             Global.DetailMap.Update();
@@ -23,13 +20,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             UpdateEnemyFormations();
 
-            Global.ActionQueue.Update();
+            UpdateFacilies();
 
-            if (Global.World.TickIndex == 0)
-            {
-                // Global.MyAirFormation = TacticalActions.CreateAirFormation();
-                TacticalActions.CompactGroundFormations();
-            }
+
+            Global.ActionQueue.Update();
         }
 
         private static void InitGlobal(Player me, World world, Game game, Move move)
@@ -102,7 +96,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             var factor = 0.5;
             var result = FormationFactory.CreateMyFormation(vehicleType);
-            result.ActionList.Add(result.Formation.ScaleCenter(factor));
+
+            var scaleAction = result.Formation.ScaleCenter(factor);
+            scaleAction.StartCondition = () =>
+            {
+                return result.ActionList.Last(a => a.ActionType == ActionType.Assign).Status ==
+                       ActionStatus.Finished;
+            };
+            result.ActionList.Add(scaleAction);
+
             Global.ActionQueue.Add(new ActionSequence(result.ActionList.ToArray()));
         }
 
@@ -111,10 +113,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             // будем пересоздавать вражеские формации не каждый тик, а то посядем по быстродействию.
             if (Global.World.TickIndex % 10 == 0)
             {
-                HashSet<Tile> allEnemyTiles = new HashSet<Tile>();
-                List<List<Tile>> formations = new List<List<Tile>>();
+                var allEnemyTiles = new HashSet<Tile>();
+                var formations = new List<List<Tile>>();
 
-                foreach (Tile tile in Global.DetailMap.Tiles)
+                foreach (var tile in Global.DetailMap.Tiles)
                 {
                     if (tile.Enemies.Count != 0 && !allEnemyTiles.Contains(tile))
                     {
@@ -140,7 +142,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Tile currentTile)
         {
             if (allEnemyTiles.Contains(currentTile))
+            {
                 return;
+            }
 
             allEnemyTiles.Add(currentTile);
             if (currentTile.Enemies.Count != 0)
@@ -158,7 +162,22 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             foreach (var facility in Global.MyFacilities)
             {
-                facility.SelectedAsTargetForGroup = null;
+                var id = facility.SelectedAsTargetForGroup;
+                if (id.HasValue)
+                {
+                    if (!Global.MyFormations.ContainsKey(id.Value))
+                    {
+                        facility.SelectedAsTargetForGroup = null;
+                    }
+                    else
+                    {
+                        var myFormation = Global.MyFormations[id.Value];
+                        if (!myFormation.Alive || !myFormation.Vehicles.Any())
+                        {
+                            facility.SelectedAsTargetForGroup = null;
+                        }
+                    }
+                }
             }
         }
     }

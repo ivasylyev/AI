@@ -12,13 +12,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 Initializer.Init(me, world, game, move);
 
+                TacticalActions.RunAwayFromNuclearStrike();
+
                 Anticollision();
 
                 AttackTest();
 
 
-//                OccupyFacilities();
-//
+                OccupyFacilities();
+
                 SetupProduction();
 
                 AssignNewGroups();
@@ -47,6 +49,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 TacticalActions.OccupyFacilities(Global.MyIfvs);
                 TacticalActions.OccupyFacilities(Global.MyTanks);
+                TacticalActions.OccupyFacilities(Global.MyArrvs);
             }
         }
 
@@ -70,12 +73,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex % 120 == 0)
             {
-                var formations = TacticalActions.CreateProducedFormation();
-
-                foreach (var formation in formations)
-                {
-                    MakeAttackOrder(formation);
-                }
+                TacticalActions.CreateProducedFormation();
             }
         }
 
@@ -85,60 +83,17 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 foreach (var formation in Global.MyFormations.Values)
                 {
-                    // todo: давать правильную команду 
-                    MakeAttackOrder(formation);
+                    if (formation.IsAllAeral)
+                    {
+                        // todo: давать правильную команду 
+                        EnemyFormation enemy = Global.EnemyFormations
+                            .OrderBy(f => f.Center.SqrDistance(formation.Center))
+                            .FirstOrDefault();
+
+                        TacticalActions.MakeAttackOrder(formation, enemy, false);
+                    }
                 }
             }
-        }
-
-        private static void MakeAttackOrder(MyFormation formation)
-        {
-            if (formation.Alive && !formation.Busy)
-            {
-                var enemy = Global.EnemyFormations.OrderBy(f => f.Center.SqrDistance(formation.Center))
-                    .FirstOrDefault();
-                var pointToMove = enemy == null
-                    ? Point.EndOfWorld / 2
-                    : enemy.Center;
-
-                var distance = pointToMove.Distance(formation.Center);
-                if (distance > 200)
-                {
-                    pointToMove = (formation.Center * 3 + pointToMove) / 4;
-                }
-                else if (distance > 100)
-                {
-                    pointToMove = (formation.Center + pointToMove) / 2;
-                }
-
-                ActionSequence sequence;
-                var actionMove = formation.MoveCenterTo(pointToMove);
-                if (formation.Density < 0.015 || distance > 200)
-                {
-                    var actionScale = formation.ScaleCenter(0.1);
-                    sequence = new ActionSequence(actionScale, actionMove);
-                }
-                else
-                {
-                    sequence = new ActionSequence(actionMove);
-                }
-
-
-                Global.ActionQueue.Add(sequence);
-            }
-        }
-
-        private void FollowTest()
-        {
-//            if (Global.World.TickIndex % 120 == 0)
-//            {
-//                if (Global.MyAirFormation.Alive)
-//                {
-//                    var action = Global.MyArrvs.MoveCenterTo(Global.MyAirFormation.Center);
-//                    var sequence = new ActionSequence(action);
-//                    Global.ActionQueue.Add(sequence);
-//                }
-//            }
         }
     }
 }
