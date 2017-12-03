@@ -17,8 +17,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public VehicleType Type { get; set; }
         public int GroupIndex { get; set; }
 
-        public Rect Rect { get; set; }
-        public Point MassCenter { get; set; }
+        public Rect Rect { get; private set; }
+        public Point MassCenter { get; private set; }
         public Point Center => Rect.Center;
 
         public double Density

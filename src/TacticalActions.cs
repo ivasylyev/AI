@@ -9,10 +9,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
     {
         public static void CompactGroundFormations()
         {
-            var factor = 0.5;
-            Global.ActionQueue.Add(new ActionSequence(Global.MyTanks.ScaleCenter(factor)));
-            Global.ActionQueue.Add(new ActionSequence(Global.MyArrvs.ScaleCenter(factor)));
-            Global.ActionQueue.Add(new ActionSequence(Global.MyIfvs.ScaleCenter(factor)));
+//            var factor = 0.5;
+//            Global.ActionQueue.Add(new ActionSequence(Global.MyTanks.ScaleCenter(factor)));
+//            Global.ActionQueue.Add(new ActionSequence(Global.MyArrvs.ScaleCenter(factor)));
+//            Global.ActionQueue.Add(new ActionSequence(Global.MyIfvs.ScaleCenter(factor)));
         }
 
         public static MyFormation CreateAirFormation()
@@ -284,28 +284,25 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         var f2 = Global.MyFormations[key2];
                         if (f2.Alive &&
                             !Global.IgnoreCollisionGroupIndexes.Contains(key2) &&
-                            (f1.IsMixed || f2.IsMixed || f1.IsAllAeral == f2.IsAllAeral)                        )
+                            (f1.IsMixed || f2.IsMixed || f1.IsAllAeral == f2.IsAllAeral))
                         {
                             var distBetweenCenters = f1.Rect.Center.SqrDistance(f2.Rect.Center);
                             if (distBetweenCenters < (f1.Rect.SqrDiameter + f2.Rect.SqrDiameter) / 2)
                             {
-                                var deltaX = f1.Center.X - f2.Center.X;
-                                var deltaY = f1.Center.Y - f2.Center.Y;
-                                double l = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                                deltaX = 20 * deltaX / l;
-                                deltaY = 20 * deltaY / l;
+                                var delta = f1.Center - f2.Center;
 
                                 if (!processedKeys.Contains(key1))
                                 {
-                                    var move1 = f1.ShiftTo(deltaX, deltaY);
+                                    var delta1 = 20 * (delta.Normalized() + f1.AvgSpeed.Normalized());
+                                    var move1 = f1.ShiftTo(delta1.X, delta1.Y);
                                     move1.Interruptable = false;
 
                                     PauseExecuteAndContinue(f1, move1);
                                 }
                                 if (!processedKeys.Contains(key2))
                                 {
-                                    var move2 = f2.ShiftTo(-deltaX, -deltaY);
+                                    var delta2 = 20 * (delta.Normalized() + f2.AvgSpeed.Normalized());
+                                    var move2 = f2.ShiftTo(-delta2.X, -delta2.Y);
                                     move2.Interruptable = false;
 
                                     PauseExecuteAndContinue(f2, move2);

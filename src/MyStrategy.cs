@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.Remoting.Lifetime;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -13,13 +14,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 Anticollision();
 
-                OccupyFacilities();
+                AttackTest();
 
+
+//                OccupyFacilities();
+//
                 SetupProduction();
 
                 AssignNewGroups();
-
-                FollowTest();
 
                 Global.ActionQueue.Process();
             }
@@ -72,17 +74,57 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 foreach (var formation in formations)
                 {
-                    // todo: давать правильную команду 
-
-                    var enemy = Global.EnemyFormations.OrderBy(f=>f.Center.SqrDistance(formation.Center)).FirstOrDefault();
-                    Point point = enemy == null
-                        ? new Point(Global.World.Width / 2, Global.World.Height / 2)
-                        : enemy.Center;
-                    var action = formation.MoveCenterTo(point);
-                    
-                    var sequence = new ActionSequence(action);
-                    Global.ActionQueue.Add(sequence);
+                    MakeAttackOrder(formation);
                 }
+            }
+        }
+
+        private void AttackTest()
+        {
+            if (Global.World.TickIndex % 120 == 0)
+            {
+                foreach (var formation in Global.MyFormations.Values)
+                {
+                    // todo: давать правильную команду 
+                    MakeAttackOrder(formation);
+                }
+            }
+        }
+
+        private static void MakeAttackOrder(MyFormation formation)
+        {
+            if (formation.Alive && !formation.Busy)
+            {
+                var enemy = Global.EnemyFormations.OrderBy(f => f.Center.SqrDistance(formation.Center))
+                    .FirstOrDefault();
+                var pointToMove = enemy == null
+                    ? Point.EndOfWorld / 2
+                    : enemy.Center;
+
+                var distance = pointToMove.Distance(formation.Center);
+                if (distance > 200)
+                {
+                    pointToMove = (formation.Center * 3 + pointToMove) / 4;
+                }
+                else if (distance > 100)
+                {
+                    pointToMove = (formation.Center + pointToMove) / 2;
+                }
+
+                ActionSequence sequence;
+                var actionMove = formation.MoveCenterTo(pointToMove);
+                if (formation.Density < 0.015)
+                {
+                    var actionScale = formation.ScaleCenter(0.1);
+                    sequence = new ActionSequence(actionScale, actionMove);
+                }
+                else
+                {
+                    sequence = new ActionSequence(actionMove);
+                }
+
+
+                Global.ActionQueue.Add(sequence);
             }
         }
 

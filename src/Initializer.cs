@@ -19,10 +19,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             Global.Map.Update();
             Global.DetailMap.Update();
 
-            BuildEnemyFormationMap();
+            UpdateMyFormations();
 
-            UpdateFormations();
-
+            UpdateEnemyFormations();
 
             Global.ActionQueue.Update();
 
@@ -83,7 +82,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        private static void UpdateFormations()
+        private static void UpdateMyFormations()
         {
             if (Global.World.TickIndex == 0)
             {
@@ -104,26 +103,33 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        private static void BuildEnemyFormationMap()
+        private static void UpdateEnemyFormations()
         {
-            HashSet<Tile> allEnemyTiles = new HashSet<Tile>();
-            List<List<Tile>> formations = new List<List<Tile>>();
-
-
-            foreach (Tile tile in Global.DetailMap.Tiles)
+            // будем пересоздавать вражеские формации не каждый тик, а то посядем по быстродействию.
+            if (Global.World.TickIndex % 10 == 0)
             {
-                if (tile.Enemies.Count != 0 && !allEnemyTiles.Contains(tile))
+                HashSet<Tile> allEnemyTiles = new HashSet<Tile>();
+                List<List<Tile>> formations = new List<List<Tile>>();
+
+                foreach (Tile tile in Global.DetailMap.Tiles)
                 {
-                    var formationTiles = new List<Tile>();
-                    AddToEnemyFormations(allEnemyTiles, formationTiles, tile);
-                    formations.Add(formationTiles);
+                    if (tile.Enemies.Count != 0 && !allEnemyTiles.Contains(tile))
+                    {
+                        var formationTiles = new List<Tile>();
+                        AddToEnemyFormations(allEnemyTiles, formationTiles, tile);
+                        formations.Add(formationTiles);
+                    }
+                }
+
+                Global.EnemyFormations.Clear();
+                foreach (var formation in formations)
+                {
+                    FormationFactory.CreateEnemyFormation(formation);
                 }
             }
-
-            Global.EnemyFormations.Clear();
-            foreach (var formation in formations)
+            foreach (var formation in Global.EnemyFormations)
             {
-                FormationFactory.CreateEnemyFormation(formation);
+                formation.Update(Global.World.VehicleUpdates);
             }
         }
 
