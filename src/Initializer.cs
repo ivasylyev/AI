@@ -87,12 +87,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex == 0)
             {
-                FormationFactory.CreateEnemyFormation(VehicleType.Arrv);
-                FormationFactory.CreateEnemyFormation(VehicleType.Ifv);
-                FormationFactory.CreateEnemyFormation(VehicleType.Tank);
-                FormationFactory.CreateEnemyFormation(VehicleType.Fighter);
-                FormationFactory.CreateEnemyFormation(VehicleType.Helicopter);
-
                 Global.ActionQueue.Add(new ActionSequence(
                     FormationFactory.CreateMyFormation(VehicleType.Arrv).ActionList.ToArray()));
                 Global.ActionQueue.Add(new ActionSequence(
@@ -105,10 +99,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     FormationFactory.CreateMyFormation(VehicleType.Helicopter).ActionList.ToArray()));
             }
             foreach (var formation in Global.MyFormations.Values)
-            {
-                formation.Update(Global.World.VehicleUpdates);
-            }
-            foreach (var formation in Global.EnemyFormations.Values)
             {
                 formation.Update(Global.World.VehicleUpdates);
             }
@@ -129,7 +119,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     formations.Add(formationTiles);
                 }
             }
-            var formationsCount = formations.Count;
+
+            Global.EnemyFormations.Clear();
+            foreach (var formation in formations)
+            {
+                FormationFactory.CreateEnemyFormation(formation);
+            }
         }
 
         private static void AddToEnemyFormations(HashSet<Tile> allEnemyTiles, List<Tile> formationTiles,

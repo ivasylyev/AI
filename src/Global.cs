@@ -17,7 +17,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static readonly Dictionary<int, MyFormation> MyFormations = new Dictionary<int, MyFormation>();
         public static readonly List<int> IgnoreCollisionGroupIndexes = new List<int>();
-        public static readonly Dictionary<int, EnemyFormation> EnemyFormations = new Dictionary<int, EnemyFormation>();
+        public static readonly List<EnemyFormation> EnemyFormations = new List<EnemyFormation>();
 
         public static readonly Dictionary<long, VehicleWrapper> AllVehicles = new Dictionary<long, VehicleWrapper>();
         public static readonly Dictionary<long, VehicleWrapper> MyVehicles = new Dictionary<long, VehicleWrapper>();
@@ -32,11 +32,20 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static MyFormation MyIfvs => MyFormations[1 + (int) VehicleType.Ifv];
         public static MyFormation MyTanks => MyFormations[1 + (int) VehicleType.Tank];
 
-        public static EnemyFormation EnemyFighters => EnemyFormations[1 + (int) VehicleType.Fighter];
-        public static EnemyFormation EnemyHelicopters => EnemyFormations[1 + (int) VehicleType.Helicopter];
-        public static EnemyFormation EnemyArrvs => EnemyFormations[1 + (int) VehicleType.Arrv];
-        public static EnemyFormation EnemyIfvs => EnemyFormations[1 + (int) VehicleType.Ifv];
-        public static EnemyFormation EnemyTanks => EnemyFormations[1 + (int) VehicleType.Tank];
+        public static IEnumerable<VehicleWrapper> EnemyFighters =>
+            EnemyVehicles.Values.Where(v => v.Type == VehicleType.Fighter);
+
+        public static IEnumerable<VehicleWrapper> EnemyHelicopters =>
+            EnemyVehicles.Values.Where(v => v.Type == VehicleType.Helicopter);
+
+        public static IEnumerable<VehicleWrapper> EnemyArrvs =>
+            EnemyVehicles.Values.Where(v => v.Type == VehicleType.Arrv);
+
+        public static IEnumerable<VehicleWrapper> EnemyIfvs =>
+            EnemyVehicles.Values.Where(v => v.Type == VehicleType.Ifv);
+
+        public static IEnumerable<VehicleWrapper> EnemyTanks =>
+            EnemyVehicles.Values.Where(v => v.Type == VehicleType.Tank);
 
         public static MyFormation SelectedFormation;
         public static MyFormation MyAirFormation;

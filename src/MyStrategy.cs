@@ -54,7 +54,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex % 10 == 0)
             {
                 var myFightersCount = Global.MyFighters.Vehicles.Count;
-                var enemyAirCount = Global.EnemyFighters.Vehicles.Count + Global.EnemyHelicopters.Vehicles.Count;
+                var enemyAirCount = Global.EnemyFighters.Count() + Global.EnemyHelicopters.Count();
                 var neededType = myFightersCount < enemyAirCount ? VehicleType.Fighter : VehicleType.Helicopter;
 
                 foreach (var facility in Global.MyFacilities)
@@ -74,8 +74,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     // todo: давать правильную команду 
 
-                    var enemyFormation = Global.EnemyArrvs.Vehicles.Any()? Global.EnemyArrvs: Global.EnemyHelicopters;
-                    var action = formation.MoveCenterTo(enemyFormation.Center.X, enemyFormation.Center.Y);
+                    var enemy = Global.EnemyFormations.OrderBy(f=>f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+                    Point point = enemy == null
+                        ? new Point(Global.World.Width / 2, Global.World.Height / 2)
+                        : enemy.Center;
+                    var action = formation.MoveCenterTo(point);
                     
                     var sequence = new ActionSequence(action);
                     Global.ActionQueue.Add(sequence);
@@ -85,15 +88,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void FollowTest()
         {
-            if (Global.World.TickIndex % 120 == 0)
-            {
-                if (Global.MyAirFormation.Alive)
-                {
-                    var action = Global.MyArrvs.MoveCenterTo(Global.MyAirFormation.Center);
-                    var sequence = new ActionSequence(action);
-                    Global.ActionQueue.Add(sequence);
-                }
-            }
+//            if (Global.World.TickIndex % 120 == 0)
+//            {
+//                if (Global.MyAirFormation.Alive)
+//                {
+//                    var action = Global.MyArrvs.MoveCenterTo(Global.MyAirFormation.Center);
+//                    var sequence = new ActionSequence(action);
+//                    Global.ActionQueue.Add(sequence);
+//                }
+//            }
         }
     }
 }

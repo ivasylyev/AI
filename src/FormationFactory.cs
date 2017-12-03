@@ -7,25 +7,34 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class FormationFactory
     {
-        public static EnemyFormation CreateEnemyFormation(VehicleType type)
+        public static EnemyFormation CreateEnemyFormation(IEnumerable<VehicleWrapper> vehicles)
         {
-            var formation = new EnemyFormation
+            var formation = new EnemyFormation();
+            foreach (var v in vehicles)
             {
-                GroupIndex = 1 + (int) type,
-                Type = type
-            };
-
-            foreach (var keyVal in Global.EnemyVehicles)
-            {
-                if (keyVal.Value.Type == type)
-                {
-                    formation.Vehicles.Add(keyVal.Key, keyVal.Value);
-                }
+                formation.Vehicles.Add(v.Id, v);
             }
 
             formation.Update();
-            Global.EnemyFormations.Add(formation.GroupIndex, formation);
+            Global.EnemyFormations.Add(formation);
             return formation;
+        }
+
+        public static EnemyFormation CreateEnemyFormation(IEnumerable<Tile> tiles)
+        {
+            var vehicles = GetVehiclesFromTiles(tiles);
+            return CreateEnemyFormation(vehicles);
+        }
+
+        private static IEnumerable<VehicleWrapper> GetVehiclesFromTiles(IEnumerable<Tile> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                foreach (var enemy in tile.Enemies)
+                {
+                    yield return enemy;
+                }
+            }
         }
 
         public static FormationResult CreateMyFormation(VehicleType type)
@@ -129,11 +138,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static int GetMyFreeFormationIndex()
         {
             return Enumerable.Range(1, 100).Except(Global.MyFormations.Keys).FirstOrDefault();
-        }
-
-        public static int GetEnemyFreeFormationIndex()
-        {
-            return Enumerable.Range(1, 100).Except(Global.EnemyFormations.Keys).FirstOrDefault();
         }
     }
 }
