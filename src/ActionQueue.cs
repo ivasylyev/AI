@@ -41,7 +41,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 action.Status = ActionStatus.Pending;
             }
         }
-
+        public bool HasActionsFor(ActionType type)
+        {
+            return _internalQueue.Any(sequence => sequence.Any(a => a.ActionType == type));
+        }
         public bool HasActionsFor(MyFormation formation)
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));

@@ -92,7 +92,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             _neighbors.Add(SE = GetTile(map, +1, +1));
         }
 
-        public bool Includes(Point point)
+        public bool IsInside(Point point)
         {
             return TileFrame.IsInside(point);
         }

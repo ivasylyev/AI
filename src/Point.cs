@@ -80,6 +80,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return new Point(a.X - b.X, a.Y - b.Y);
         }
 
+        public static double operator *(Point a, Point b)
+        {
+            return a.X * b.X + a.Y * b.Y;
+        }
+
+
         public static Point operator *(Point a, double factor)
         {
             return new Point(factor * a.X, factor * a.Y);

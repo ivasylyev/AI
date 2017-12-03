@@ -1,10 +1,23 @@
-﻿using System.Runtime.InteropServices.ComTypes;
+﻿using System;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class OperationalActions
     {
+        public static Action TacticalNuclearStrike(this VehicleWrapper visitor, VehicleWrapper target)
+        {
+            var action = new Action
+            {
+                ActionType = ActionType.TacticalNuclearStrike,
+                GetX = () => target.X + 30 * target.SpeedX,
+                GetY = () => target.Y + 30 * target.SpeedY,
+                VehicleId = visitor.Id,
+                Urgent = true,
+            };
+            return action;
+        }
+
         public static Action SetupProduction(this Facility facility, VehicleType type)
         {
             var action = new Action
@@ -74,6 +87,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             };
             return action;
         }
+
         public static Action ScalePoint(this MyFormation formation, Point point, double factor)
         {
             var action = new Action(formation)

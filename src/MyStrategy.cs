@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Remoting.Lifetime;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
@@ -11,6 +12,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             //try
             {
                 Initializer.Init(me, world, game, move);
+
+                TacticalActions.NuclearStrike();
 
                 TacticalActions.RunAwayFromNuclearStrike();
 
@@ -83,14 +86,22 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 foreach (var formation in Global.MyFormations.Values)
                 {
-                    if (formation.IsAllAeral)
+                    if (formation.Alive && formation.IsAllAeral)
                     {
+                        Dictionary<Formation, double> dangerForEnemy = new Dictionary<Formation, double>();
+                        Dictionary<Formation, double> dangerForMe = new Dictionary<Formation, double>();
+                        foreach (var enemy in Global.EnemyFormations)
+                        {
+                            dangerForEnemy.Add(enemy, formation.DangerFor(enemy));
+                            dangerForMe.Add(enemy, formation.DangerFor(enemy));
+                        }
                         // todo: давать правильную команду 
-                        EnemyFormation enemy = Global.EnemyFormations
+                        EnemyFormation enemy1 = Global.EnemyFormations
                             .OrderBy(f => f.Center.SqrDistance(formation.Center))
                             .FirstOrDefault();
 
-                        TacticalActions.MakeAttackOrder(formation, enemy, false);
+
+                        TacticalActions.MakeAttackOrder(formation, enemy1, false);
                     }
                 }
             }

@@ -193,7 +193,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         .Where(v => v.Groups.Length == 0 && v.IsInside(facility.Rect) && v.IsStanding)
                         .ToList();
 
-                    if (createdVehicles.Count > 40)
+                    if (createdVehicles.Count > 50 || facility.NearGroundEnemyCount > 10 && createdVehicles.Count > 20)
                     {
                         Rect createdRect = new Rect(createdVehicles.Min(v => v.X),
                             createdVehicles.Min(v => v.Y),
@@ -252,14 +252,27 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 var pointToMove = enemy == null
                     ? Point.EndOfWorld / 2
-                    : enemy.Center;
+                    : enemy.MassCenter;
 
-                var distance = pointToMove.Distance(me.Center);
-                if (distance > 200)
+
+                var myMassCenter = me.MassCenter;
+                var distance = pointToMove.Distance(myMassCenter);
+
+                if (enemy != null)
                 {
-                    pointToMove = (me.Center * 3 + pointToMove) / 4;
+                    var enemySpeedScalar = enemy.AvgSpeed.Length();
+                    var mySpeedScalar = me.MaxSpeed;
+
+                    Point myDirection = (pointToMove - myMassCenter).Normalized();
+                    Point enemyDirection = enemy.AvgSpeed.Normalized();
+
+                    var resultDirection =
+                        (myDirection + (enemySpeedScalar / mySpeedScalar) * enemyDirection).Normalized();
+
+                    pointToMove = myMassCenter + distance * resultDirection;
                 }
-                else if (distance > 100)
+
+                if (distance > 100)
                 {
                     pointToMove = (me.Center + pointToMove) / 2;
                 }
@@ -293,7 +306,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var ahtung = enemy.NextNuclearStrikeTickIndex - Global.World.TickIndex == 29;
             if (ahtung)
             {
-                // uncomment after debug
                 Point strikePoint = new Point(enemy.NextNuclearStrikeX, enemy.NextNuclearStrikeY);
                 //          Point strikePoint = Global.MyFighters.Center;
 
@@ -311,9 +323,75 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     var scale2 = formation.ScalePoint(strikePoint, 0.1);
                     scale2.Interruptable = false;
                     scale2.Urgent = true;
-                    scale2.StartCondition = () => { return Global.World.TickIndex >= scale1.AbortAtWorldTick; };
+                    scale2.StartCondition = () => Global.World.TickIndex >= scale1.AbortAtWorldTick;
                     PauseExecuteAndContinue(formation, scale1, scale2);
                 }
+            }
+        }
+
+        public static void NuclearStrike()
+        {
+            if (Global.Me.RemainingNuclearStrikeCooldownTicks == 0 &&
+                Global.Me.NextNuclearStrikeTickIndex == -1 &&
+                Global.World.TickIndex % 60 == 55 &&
+                !Global.ActionQueue.HasActionsFor(ActionType.TacticalNuclearStrike))
+            {
+                VehicleWrapper possibleTarget = null;
+                double bestDeltaDamage = Math.Min(30 * 100, Global.EnemyVehicles.Values.Sum(i => i.Durability) / 5);
+
+                var sqrNuclearRadius =
+                    Global.Game.TacticalNuclearStrikeRadius * Global.Game.TacticalNuclearStrikeRadius;
+
+                const double visionRangeThreshold = 0.7;
+                foreach (var enemy in Global.EnemyVehicles.Values)
+                {
+                    var visors = Global.MyVehicles.Values
+                        .Where(i => i.SqrDistance(enemy) < visionRangeThreshold * i.VisionRange * i.VisionRange)
+                        .ToList();
+                    if (visors.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var allDamaged = Global.AllVehicles.Values
+                        .Where(i => i.SqrDistance(enemy) < sqrNuclearRadius)
+                        .ToList();
+
+                    var enemyDamaged = allDamaged.Where(i => i.PlayerId != Global.Me.Id).ToList();
+                    var myDamaged = allDamaged.Where(i => i.PlayerId == Global.Me.Id).ToList();
+
+                    if (enemyDamaged.Count <= Math.Min(30, Global.EnemyVehicles.Count / 2 - 10))
+                    {
+                        continue;
+                    }
+
+                    var myDamage = myDamaged
+                        .Sum(i => Math.Min(i.Durability,
+                            Global.Game.MaxTacticalNuclearStrikeDamage *
+                            (1 - Math.Sqrt(i.SqrDistance(enemy) / sqrNuclearRadius))));
+                    var enemyDamage = enemyDamaged
+                        .Sum(i => Math.Min(i.Durability,
+                            Global.Game.MaxTacticalNuclearStrikeDamage *
+                            (1 - Math.Sqrt(i.SqrDistance(enemy) / sqrNuclearRadius))));
+
+                    if (enemyDamage - myDamage > bestDeltaDamage)
+                    {
+                        bestDeltaDamage = enemyDamage - myDamage;
+                        possibleTarget = enemy;
+                    }
+                }
+
+                if (possibleTarget == null)
+                {
+                    return;
+                }
+                var visor = Global.MyVehicles.Values
+                    .Where(i => i.SqrDistance(possibleTarget) < visionRangeThreshold * i.VisionRange * i.VisionRange)
+                    .OrderBy(i => i.SqrDistance(possibleTarget)).First();
+
+                var action = visor.TacticalNuclearStrike(possibleTarget);
+                var newSequence = new ActionSequence(action);
+                Global.ActionQueue.Add(newSequence);
             }
         }
 
@@ -408,6 +486,20 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     }
                 }
             }
+        }
+
+
+        public static double DangerFor(this Formation source, Formation dest)
+        {
+            
+            var destAeralPercent = dest.AeralPercent;
+            var oneUnitAeralAttack = destAeralPercent * (source.AvgAerialDamage - dest.AvgAerialDefence);
+            var oneUnitGroundAttack = (1 - destAeralPercent) * (source.AvgGroundDamage - dest.AvgGroundDefence);
+            var oneUnitAttack = oneUnitGroundAttack + oneUnitAeralAttack;
+            var totalAttack = source.Count * oneUnitAttack;
+
+            var danger = totalAttack / (dest.Durability + 1);
+            return danger;
         }
     }
 }

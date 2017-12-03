@@ -21,6 +21,18 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public Point MassCenter { get; private set; }
         public Point Center => Rect.Center;
 
+        public double MaxSpeed
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Max(v => v.MaxSpeed);
+            }
+        }
+
         public double Density
         {
             get
@@ -33,6 +45,66 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     Rect.Center.Distance(Vehicles.Values.OrderBy(i => Rect.Center.SqrDistance(i)).Last());
                 var sq = Math.PI * radius * radius;
                 return Vehicles.Count / sq;
+            }
+        }
+
+        public double Durability
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Sum(v => v.Durability);
+            }
+        }
+
+        public double AvgAerialDamage
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Average(v => v.AerialDamage);
+            }
+        }
+
+        public double AvgAerialDefence
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Average(v => v.AerialDefence);
+            }
+        }
+
+        public double AvgGroundDamage
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Average(v => v.GroundDamage);
+            }
+        }
+
+        public double AvgGroundDefence
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Average(v => v.GroundDefence);
             }
         }
 
@@ -63,10 +135,61 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
         public bool IsStanding => !Vehicles.Any() || Vehicles.Values.All(v => v.IsStanding);
-
         public bool IsAllAeral => Vehicles.Values.All(v => v.IsAerial);
         public bool IsAllGround => Vehicles.Values.All(v => !v.IsAerial);
         public bool IsMixed => !IsAllAeral && !IsAllGround;
+
+        public int Count => Vehicles.Count;
+
+
+        public double AeralCount
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Count(v => v.IsAerial);
+            }
+        }
+
+        public double GroundCount
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Count(v => !v.IsAerial);
+            }
+        }
+
+        public double AeralPercent
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                double aeralCount = Vehicles.Values.Count(v => v.IsAerial);
+                return aeralCount / Vehicles.Count;
+            }
+        }
+
+        public double Heath
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Durability / Vehicles.Values.Sum(v => v.MaxDurability);
+            }
+        }
 
         public virtual void Update(IEnumerable<VehicleUpdate> updates = null)
         {
