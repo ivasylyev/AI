@@ -82,7 +82,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void AttackTest()
         {
-            if (Global.World.TickIndex % 120 == 0)
+            if (Global.World.TickIndex % 120 == 0 && Global.EnemyFormations.Count > 0)
             {
                 foreach (var formation in Global.MyFormations.Values)
                 {
@@ -104,14 +104,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                         // выбирать также по расстоянию
                         EnemyFormation target = null;
-                        var targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
+                        var targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
                         if (targetPair.Value > 0)
                         {
                             target = targetPair.Key;
                         }
                         if (target == null)
                         {
-                            targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
+                            targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
                             if (targetPair.Value > 0)
                             {
                                 target = targetPair.Key;
