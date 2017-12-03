@@ -79,6 +79,7 @@
     <Compile Include="EnemyFormation.cs" />
     <Compile Include="FacilityWrapper.cs" />
     <Compile Include="Formation.cs" />
+    <Compile Include="Map.cs" />
     <Compile Include="MyFormation.cs" />
     <Compile Include="FormationFactory.cs" />
     <Compile Include="FormationResult.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="RemoteProcessClient.cs" />
     <Compile Include="Runner.cs" />
     <Compile Include="TacticalActions.cs" />
+    <Compile Include="Tile.cs" />
     <Compile Include="VehicleWrapper.cs" />
   </ItemGroup>
   <ItemGroup>

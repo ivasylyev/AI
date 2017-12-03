@@ -24,6 +24,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             LeftTop = new Point(left, top);
             RightBottom = new Point(right, bottom);
         }
+        public Rect(Point leftTop, Point rightBottom)
+        {
+            LeftTop = leftTop;
+            RightBottom = rightBottom;
+        }
 
         public Rect(IEnumerable<VehicleWrapper> vehicles)
         {
@@ -51,6 +56,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public bool IsInside(double x, double y)
         {
             return x >= Left && y >= Top && x <= Right && y <= Bottom;
+        }
+        public bool IsInside(Point p)
+        {
+            return p.X >= Left && p.Y >= Top && p.X <= Right && p.Y <= Bottom;
         }
 
         public override string ToString()

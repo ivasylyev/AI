@@ -1,4 +1,6 @@
-﻿using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
@@ -12,15 +14,21 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             UpdateVehicles();
 
+            UpdateFacilies();
+
+            Global.Map.Update();
+            Global.DetailMap.Update();
+
+            BuildEnemyFormationMap();
+
             UpdateFormations();
 
-            UpdateFacilies();
 
             Global.ActionQueue.Update();
 
             if (Global.World.TickIndex == 0)
             {
-                Global.MyAirFormation = TacticalActions.CreateAirFormation();
+                // Global.MyAirFormation = TacticalActions.CreateAirFormation();
                 TacticalActions.CompactGroundFormations();
             }
         }
@@ -105,6 +113,42 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 formation.Update(Global.World.VehicleUpdates);
             }
         }
+
+        private static void BuildEnemyFormationMap()
+        {
+            HashSet<Tile> allEnemyTiles = new HashSet<Tile>();
+            List<List<Tile>> formations = new List<List<Tile>>();
+
+
+            foreach (Tile tile in Global.DetailMap.Tiles)
+            {
+                if (tile.Enemies.Count != 0 && !allEnemyTiles.Contains(tile))
+                {
+                    var formationTiles = new List<Tile>();
+                    AddToEnemyFormations(allEnemyTiles, formationTiles, tile);
+                    formations.Add(formationTiles);
+                }
+            }
+            var formationsCount = formations.Count;
+        }
+
+        private static void AddToEnemyFormations(HashSet<Tile> allEnemyTiles, List<Tile> formationTiles,
+            Tile currentTile)
+        {
+            if (allEnemyTiles.Contains(currentTile))
+                return;
+
+            allEnemyTiles.Add(currentTile);
+            if (currentTile.Enemies.Count != 0)
+            {
+                formationTiles.Add(currentTile);
+                foreach (var neighbor in currentTile.Neighbors)
+                {
+                    AddToEnemyFormations(allEnemyTiles, formationTiles, neighbor);
+                }
+            }
+        }
+
 
         private static void UpdateFacilies()
         {

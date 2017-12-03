@@ -44,6 +44,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex > 120 && Global.World.TickIndex % 60 == 0)
             {
                 TacticalActions.OccupyFacilities(Global.MyIfvs);
+                TacticalActions.OccupyFacilities(Global.MyTanks);
             }
         }
 

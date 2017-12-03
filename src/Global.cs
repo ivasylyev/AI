@@ -7,6 +7,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 {
     public static class Global
     {
+        private static Map _map;
+        private static Map _detailMap;
+
         public static Player Me;
         public static World World;
         public static Game Game;
@@ -37,6 +40,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static MyFormation SelectedFormation;
         public static MyFormation MyAirFormation;
+
+        public static Map Map => _map ?? (_map = new Map(tilesPerSide: 16));
+        public static Map DetailMap => _detailMap ?? (_detailMap = new Map(tilesPerSide: 128));
 
 
         public static readonly ActionQueue ActionQueue = new ActionQueue();
