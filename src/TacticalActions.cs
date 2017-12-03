@@ -491,14 +491,13 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static double DangerFor(this Formation source, Formation dest)
         {
-            
             var destAeralPercent = dest.AeralPercent;
             var oneUnitAeralAttack = destAeralPercent * (source.AvgAerialDamage - dest.AvgAerialDefence);
             var oneUnitGroundAttack = (1 - destAeralPercent) * (source.AvgGroundDamage - dest.AvgGroundDefence);
             var oneUnitAttack = oneUnitGroundAttack + oneUnitAeralAttack;
-            var totalAttack = source.Count * oneUnitAttack;
-
-            var danger = totalAttack / (dest.Durability + 1);
+            //            var totalAttack = source.Count * oneUnitAttack;
+            //            var danger = totalAttack / (dest.Durability + 1);
+            var danger = oneUnitAttack / (dest.Durability + 1);
             return danger;
         }
     }

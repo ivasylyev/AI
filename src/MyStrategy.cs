@@ -88,20 +88,39 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     if (formation.Alive && formation.IsAllAeral)
                     {
-                        Dictionary<Formation, double> dangerForEnemy = new Dictionary<Formation, double>();
-                        Dictionary<Formation, double> dangerForMe = new Dictionary<Formation, double>();
+                        Dictionary<EnemyFormation, double> oneUnitDanger = new Dictionary<EnemyFormation, double>();
+                        Dictionary<EnemyFormation, double> wholeDanger = new Dictionary<EnemyFormation, double>();
                         foreach (var enemy in Global.EnemyFormations)
                         {
-                            dangerForEnemy.Add(enemy, formation.DangerFor(enemy));
-                            dangerForMe.Add(enemy, formation.DangerFor(enemy));
+                            var dangerForEnemy = formation.DangerFor(enemy);
+                            var dangerForMe = enemy.DangerFor(formation);
+                            oneUnitDanger.Add(enemy, dangerForEnemy - dangerForMe);
+
+                            wholeDanger.Add(enemy, dangerForEnemy * formation.Count - dangerForMe * enemy.Count);
                         }
+
+
                         // todo: давать правильную команду 
-                        EnemyFormation enemy1 = Global.EnemyFormations
-                            .OrderBy(f => f.Center.SqrDistance(formation.Center))
-                            .FirstOrDefault();
 
-
-                        TacticalActions.MakeAttackOrder(formation, enemy1, false);
+                        // выбирать также по расстоянию
+                        EnemyFormation target = null;
+                        var targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
+                        if (targetPair.Value > 0)
+                        {
+                            target = targetPair.Key;
+                        }
+                        if (target == null)
+                        {
+                            targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
+                            if (targetPair.Value > 0)
+                            {
+                                target = targetPair.Key;
+                            }
+                        }
+                        if (target != null)
+                        {
+                            TacticalActions.MakeAttackOrder(formation, target, false);
+                        }
                     }
                 }
             }
