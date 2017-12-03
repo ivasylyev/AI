@@ -25,6 +25,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public bool Urgent { get; set; }
         public bool Interruptable { get; set; } = true;
+        public bool IsAnticollision { get; set; }
         public int WaitForWorldTick { get; set; }
         public ActionStatus Status { get; set; } = ActionStatus.Pending;
 
@@ -100,7 +101,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public override string ToString()
         {
             return
-                $"Tick:{Global.World.TickIndex},{ActionType} Rect:({GetLeft()};{GetTop()}  {GetRight()};{GetBottom()}), X;Y:({GetX()};{GetY()}), Group:{Group} Status:{Status}";
+                $"Tick:{Global.World.TickIndex},{ActionType},{Formation?.Type}, Rect:({GetLeft():###.#};{GetTop():###.#}  {GetRight():###.#};{GetBottom():###.#}), X;Y:({GetX():###.#};{GetY():###.#}), Group:{Group} Status:{Status}";
         }
     }
 }

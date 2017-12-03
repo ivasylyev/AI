@@ -86,21 +86,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex == 0)
             {
-                Global.ActionQueue.Add(new ActionSequence(
-                    FormationFactory.CreateMyFormation(VehicleType.Arrv).ActionList.ToArray()));
-                Global.ActionQueue.Add(new ActionSequence(
-                    FormationFactory.CreateMyFormation(VehicleType.Ifv).ActionList.ToArray()));
-                Global.ActionQueue.Add(new ActionSequence(
-                    FormationFactory.CreateMyFormation(VehicleType.Tank).ActionList.ToArray()));
-                Global.ActionQueue.Add(new ActionSequence(
-                    FormationFactory.CreateMyFormation(VehicleType.Fighter).ActionList.ToArray()));
-                Global.ActionQueue.Add(new ActionSequence(
-                    FormationFactory.CreateMyFormation(VehicleType.Helicopter).ActionList.ToArray()));
+                CreateAndScale(VehicleType.Tank);
+                CreateAndScale(VehicleType.Ifv);
+                CreateAndScale(VehicleType.Arrv);
+                CreateAndScale(VehicleType.Helicopter);
+                CreateAndScale(VehicleType.Fighter);
             }
             foreach (var formation in Global.MyFormations.Values)
             {
                 formation.Update(Global.World.VehicleUpdates);
             }
+        }
+
+        private static void CreateAndScale(VehicleType vehicleType)
+        {
+            var factor = 0.5;
+            var result = FormationFactory.CreateMyFormation(vehicleType);
+            result.ActionList.Add(result.Formation.ScaleCenter(factor));
+            Global.ActionQueue.Add(new ActionSequence(result.ActionList.ToArray()));
         }
 
         private static void UpdateEnemyFormations()

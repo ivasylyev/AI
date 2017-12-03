@@ -10,11 +10,35 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         private static int _wait = -1;
         private readonly List<ActionSequence> _internalQueue = new List<ActionSequence>();
 
-        public void Add(ActionSequence actions)
+        public void Add(ActionSequence sequence)
         {
-            _internalQueue.Add(actions);
+            var moveActions = sequence.Where(a => a.ActionType == ActionType.Move && a.Formation != null).ToList();
+            if (moveActions.Count == 1)
+            {
+                var action = moveActions.First();
+                if (action.IsAnticollision)
+                {
+                    if (_internalQueue.Any(s => s.Any(a => a.IsAnticollision &&
+                                                           a.Formation == action.Formation &&
+                                                           a.Status == ActionStatus.Pending || a.Status == ActionStatus.Executing)))
+                    {
+                        action.Status = ActionStatus.Aborted;
+                        return;
+                    }
+                }
 
-            foreach (var action in actions)
+                bool FindInterruptableAction(Action a) => a.Interruptable &&
+                                             a.ActionType == ActionType.Move &&
+                                             a.Formation == action.Formation &&
+                                             a.Status == ActionStatus.Pending;
+
+                var oldSequence = _internalQueue.LastOrDefault(s => s.Any(FindInterruptableAction));
+                var actionToReplace = oldSequence?.LastOrDefault(FindInterruptableAction);
+                actionToReplace?.Abort();
+            }
+            _internalQueue.Add(sequence);
+
+            foreach (var action in sequence)
             {
                 action.Status = ActionStatus.Pending;
             }

@@ -113,7 +113,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 ActionSequence sequence;
                 var actionMove = formation.MoveCenterTo(pointToMove);
-                if (formation.Density < 0.015)
+                if (formation.Density < 0.015 || distance > 200)
                 {
                     var actionScale = formation.ScaleCenter(0.1);
                     sequence = new ActionSequence(actionScale, actionMove);

@@ -250,7 +250,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (formation != null && formation.Alive && action.Length > 0)
             {
                 var executingAction = formation.ExecutingSequence?.GetExecutingAction();
-                if (executingAction != null && executingAction.ActionType == ActionType.Move &&
+                if (executingAction != null && 
+                    executingAction.ActionType == ActionType.Move &&
                     executingAction.Interruptable)
                 {
                     action.First().StartCondition = () => true;
@@ -296,6 +297,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                                     var delta1 = 20 * (delta.Normalized() + f1.AvgSpeed.Normalized());
                                     var move1 = f1.ShiftTo(delta1.X, delta1.Y);
                                     move1.Interruptable = false;
+                                    move1.IsAnticollision = true;
 
                                     PauseExecuteAndContinue(f1, move1);
                                 }
@@ -304,6 +306,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                                     var delta2 = 20 * (delta.Normalized() + f2.AvgSpeed.Normalized());
                                     var move2 = f2.ShiftTo(-delta2.X, -delta2.Y);
                                     move2.Interruptable = false;
+                                    move2.IsAnticollision = true;
 
                                     PauseExecuteAndContinue(f2, move2);
                                 }
