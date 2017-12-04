@@ -64,7 +64,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public override string ToString()
         {
-            return $"{Type}, Busy:{Busy}, Rect:{Rect}";
+            return $"{Type}, Count:{Count}, Busy:{Busy}, Rect:{Rect}";
         }
     }
 }

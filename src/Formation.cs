@@ -209,10 +209,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 : Point.Zero;
         }
 
-
+     
         public override string ToString()
         {
-            return $"{Type}, Rect:{Rect}";
+            return $"Rect:{Rect}, Count:{Count}";
         }
     }
 }

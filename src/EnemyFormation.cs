@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -29,6 +30,22 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public override void Update(IEnumerable<VehicleUpdate> updates = null)
         {
             base.Update(updates);
+        }
+
+        private string TypesToString()
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (var kv in TypesCount)
+            {
+                if (kv.Value > 0)
+                    result.Append($" {kv.Key}:{kv.Value}");
+            }
+            return result.ToString();
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() +TypesToString();
         }
     }
 }

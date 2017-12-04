@@ -42,6 +42,12 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 action.Status = ActionStatus.Pending;
             }
         }
+
+        public void Clear()
+        {
+            _internalQueue.Clear();
+        }
+
         public bool HasActionsFor(ActionType type)
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.ActionType == type));

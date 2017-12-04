@@ -64,6 +64,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             return action;
         }
 
+        public static Action ShiftTo(this MyFormation formation,Point point, double maxSpeed = 10)
+        {
+            return ShiftTo(formation, point.X, point.Y, maxSpeed);
+        }
+
         public static Action ShiftTo(this MyFormation formation, double x, double y, double maxSpeed = 10)
         {
             var action = new Action(formation)
