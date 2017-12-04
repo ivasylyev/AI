@@ -15,7 +15,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 TacticalActions.RunAwayFromNuclearStrike();
 
-                
 
                 Anticollision();
 
@@ -36,8 +35,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 //            }
         }
 
-     
-
 
         private void Anticollision()
         {
@@ -47,14 +44,42 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
+        static VehicleType neededType = VehicleType.Fighter;
 
         private void SetupProduction()
         {
             if (Global.World.TickIndex % 10 == 0)
             {
                 var myFightersCount = Global.MyFighters.Vehicles.Count;
-                var enemyAirCount = Global.EnemyFighters.Count() + Global.EnemyHelicopters.Count();
-                var neededType = myFightersCount < enemyAirCount ? VehicleType.Fighter : VehicleType.Helicopter;
+                var myHelisCount = Global.MyHelicopters.Vehicles.Count;
+
+                var enemyFightersCount = Global.EnemyFighters.Count();
+                var enemyHeliCount = Global.EnemyHelicopters.Count();
+
+
+                if (myFightersCount < enemyFightersCount + enemyHeliCount)
+                {
+                    neededType = VehicleType.Fighter;
+                }
+                else if (myHelisCount < enemyHeliCount)
+                {
+                    neededType = VehicleType.Helicopter;
+                }
+                else
+                {
+                    if (Global.World.TickIndex % 1800 == 0)
+                    {
+                        neededType = VehicleType.Tank;
+                    }
+                    if (Global.World.TickIndex % 1800 == 600)
+                    {
+                        neededType = VehicleType.Arrv;
+                    }
+                    if (Global.World.TickIndex % 1800 == 1200)
+                    {
+                        neededType = VehicleType.Ifv;
+                    }
+                }
 
                 foreach (var facility in Global.MyFacilities)
                 {
