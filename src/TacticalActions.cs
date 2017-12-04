@@ -227,9 +227,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        public static void OccupyFacilities(MyFormation formation)
+        public static bool OccupyFacilities(MyFormation formation)
         {
-            if (formation.Alive && !formation.Busy)
+            if (formation.Alive && !formation.Busy && formation.AeralPercent <0.1)
             {
                 var freeFacility = Global.World.Facilities
                     .OrderBy(f => f.Center.SqrDistance(formation.Center))
@@ -242,8 +242,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     var actionMove = formation.MoveCenterTo(freeFacility.Center);
                     var sequence = new ActionSequence(actionMove);
                     Global.ActionQueue.Add(sequence);
+                    return true;
                 }
             }
+            return false;
         }
 
         public static void MakeAttackOrder(MyFormation me, EnemyFormation enemy, bool breakCurrentAction)
@@ -436,15 +438,13 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         var distBetweenCenters = f1.Rect.Center.SqrDistance(facility.Rect.Center);
                         if (distBetweenCenters < (f1.Rect.SqrDiameter + facility.Rect.SqrDiameter) / 2)
                         {
-                            if (!processedKeys.Contains(key1))
+                            if (!processedKeys.Contains(key1) )
                             {
                                 processedKeys.Add(key1);
                                 var delta = f1.Center - facility.Center;
                                 delta = 50 * delta.Normalized();
-                                var move = f1.ShiftTo(delta.X, delta.Y);
-                                move.Interruptable = false;
-                                move.IsAnticollision = true;
-                                PauseExecuteAndContinue(f1, move);
+
+                                CompactAndContinue(f1, delta);
                             }
                         }
                     }
@@ -465,26 +465,45 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                                 {
                                     processedKeys.Add(key1);
                                     var delta1 = 20 * (delta.Normalized() + f1.AvgSpeed.Normalized());
-                                    var move1 = f1.ShiftTo(delta1.X, delta1.Y);
-                                    move1.Interruptable = false;
-                                    move1.IsAnticollision = true;
 
-                                    PauseExecuteAndContinue(f1, move1);
+                                    CompactAndContinue(f1, delta1);
                                 }
                                 if (!processedKeys.Contains(key2))
                                 {
                                     processedKeys.Add(key2);
                                     var delta2 = 20 * (delta.Normalized() + f2.AvgSpeed.Normalized());
-                                    var move2 = f2.ShiftTo(-delta2.X, -delta2.Y);
-                                    move2.Interruptable = false;
-                                    move2.IsAnticollision = true;
 
-                                    PauseExecuteAndContinue(f2, move2);
+                                    CompactAndContinue(f2, -1*delta2);
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
+
+        private static void CompactAndContinue(MyFormation f1, Point delta)
+        {
+            const double densistyLimit = 0.01;
+            var move1 = f1.ShiftTo(delta.X, delta.Y);
+            move1.Interruptable = false;
+            move1.IsAnticollision = true;
+            if (f1.Density < densistyLimit)
+            {
+                var scale1 = f1.ScalePoint(f1.MassCenter, 0.1);
+                scale1.Interruptable = false;
+                scale1.IsAnticollision = true;
+                scale1.AbortAtWorldTick = Global.World.TickIndex + 10;
+
+                var rotate = f1.RotateCenter(Math.PI / 2);
+                rotate.Interruptable = false;
+                rotate.StartCondition = () => Global.World.TickIndex >= scale1.AbortAtWorldTick;
+
+                PauseExecuteAndContinue(f1, scale1, rotate, move1);
+            }
+            else
+            {
+                PauseExecuteAndContinue(f1, move1);
             }
         }
 
@@ -497,7 +516,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var oneUnitAttack = oneUnitGroundAttack + oneUnitAeralAttack;
             //            var totalAttack = source.Count * oneUnitAttack;
             //            var danger = totalAttack / (dest.Durability + 1);
-            var danger = oneUnitAttack / (dest.Durability + 1);
+            var danger = Math.Max(0, oneUnitAttack / (dest.Durability + 1));
             return danger;
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Lifetime;
 using Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk.Model;
 
 namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
@@ -19,10 +18,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
                 Anticollision();
 
-                AttackTest();
+                AttackOrDefenceOrOccupy();
 
-
-                OccupyFacilities();
 
                 SetupProduction();
 
@@ -42,17 +39,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (Global.World.TickIndex > 120 && Global.World.TickIndex % 20 == 0)
             {
                 TacticalActions.Anticollision();
-            }
-        }
-
-
-        private void OccupyFacilities()
-        {
-            if (Global.World.TickIndex > 120 && Global.World.TickIndex % 60 == 0)
-            {
-                TacticalActions.OccupyFacilities(Global.MyIfvs);
-                TacticalActions.OccupyFacilities(Global.MyTanks);
-                TacticalActions.OccupyFacilities(Global.MyArrvs);
             }
         }
 
@@ -80,47 +66,93 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        private void AttackTest()
+        private void AttackOrDefenceOrOccupy()
         {
-            if (Global.World.TickIndex % 120 == 0 && Global.EnemyFormations.Count > 0)
+            if (Global.World.TickIndex % 120 == 0 &&
+                Global.EnemyFormations.Count > 0 &&
+                Global.World.TickIndex % 60 == 0)
             {
-                foreach (var formation in Global.MyFormations.Values)
+                foreach (var formation in Global.MyFormations.Values.Where(f => f.Alive && f.Vehicles.Any()))
                 {
-                    if (formation.Alive && formation.IsAllAeral)
+                    if (TacticalActions.OccupyFacilities(formation))
                     {
-                        Dictionary<EnemyFormation, double> oneUnitDanger = new Dictionary<EnemyFormation, double>();
-                        Dictionary<EnemyFormation, double> wholeDanger = new Dictionary<EnemyFormation, double>();
-                        foreach (var enemy in Global.EnemyFormations)
+                        continue;
+                    }
+                    if (formation == Global.MyHelicopters && Global.EnemyFighters.Count() > 30)
+                    {
+                        MyFormation foundAllyGround = null;
+                        if (Global.MyIfvs.Alive && Global.MyIfvs.Vehicles.Count > 30)
                         {
-                            var dangerForEnemy = formation.DangerFor(enemy);
-                            var dangerForMe = enemy.DangerFor(formation);
-                            oneUnitDanger.Add(enemy, dangerForEnemy - dangerForMe);
-
-                            wholeDanger.Add(enemy, dangerForEnemy * formation.Count - dangerForMe * enemy.Count);
+                            foundAllyGround = Global.MyIfvs;
                         }
+                        else if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
+                        {
+                            foundAllyGround = Global.MyArrvs;
+                        }
+                        if (foundAllyGround != null)
+                        {
+                            var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
+                            var sequence = new ActionSequence(actionMove);
+                            Global.ActionQueue.Add(sequence);
+                            continue;
+                        }
+                    }
+                    if (formation == Global.MyFighters)
+                    {
+                        if (Global.EnemyFighters.Count() > 10)
+                        {
+                            var enemy = FormationFactory.CreateEnemyFormation(Global.EnemyFighters);
+                            TacticalActions.MakeAttackOrder(formation, enemy, false);
+                            continue;
+                        }
+                        if (Global.EnemyHelicopters.Count() > 10)
+                        {
+                            var enemy = FormationFactory.CreateEnemyFormation(Global.EnemyHelicopters);
+                            TacticalActions.MakeAttackOrder(formation, enemy, false);
+                            continue;
+                        }
+                        if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
+                        {
+                            var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
+                            var sequence = new ActionSequence(actionMove);
+                            Global.ActionQueue.Add(sequence);
+                            continue;
+                        }
+                    }
 
 
-                        // todo: давать правильную команду 
+                    var oneUnitDanger = new Dictionary<EnemyFormation, double>();
+                    var wholeDanger = new Dictionary<EnemyFormation, double>();
+                    foreach (var enemy in Global.EnemyFormations)
+                    {
+                        var dangerForEnemy = formation.DangerFor(enemy);
+                        var dangerForMe = enemy.DangerFor(formation);
+                        oneUnitDanger.Add(enemy, dangerForEnemy - dangerForMe);
 
-                        // выбирать также по расстоянию
-                        EnemyFormation target = null;
-                        var targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
+                        wholeDanger.Add(enemy, dangerForEnemy * formation.Count - dangerForMe * enemy.Count);
+                    }
+
+
+                    // todo: давать правильную команду 
+
+                    // выбирать также по расстоянию
+                    EnemyFormation target = null;
+                    var targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
+                    if (targetPair.Value > 0)
+                    {
+                        target = targetPair.Key;
+                    }
+                    if (target == null)
+                    {
+                        targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
                         if (targetPair.Value > 0)
                         {
                             target = targetPair.Key;
                         }
-                        if (target == null)
-                        {
-                            targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
-                            if (targetPair.Value > 0)
-                            {
-                                target = targetPair.Key;
-                            }
-                        }
-                        if (target != null)
-                        {
-                            TacticalActions.MakeAttackOrder(formation, target, false);
-                        }
+                    }
+                    if (target != null)
+                    {
+                        TacticalActions.MakeAttackOrder(formation, target, false);
                     }
                 }
             }
