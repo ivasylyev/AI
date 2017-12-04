@@ -108,7 +108,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public override string ToString()
         {
-            return $"({X}; {Y})";
+            return $"({X:000.0}; {Y:000.0})";
         }
     }
 }

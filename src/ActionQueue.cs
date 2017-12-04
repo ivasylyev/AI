@@ -19,8 +19,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     if (_internalQueue.Any(s => s.Any(a => a.IsAnticollision &&
                                                            a.Formation == action.Formation &&
-                                                           a.Status == ActionStatus.Pending ||
-                                                           a.Status == ActionStatus.Executing)))
+                                                           (a.Status == ActionStatus.Pending ||
+                                                           a.Status == ActionStatus.Executing))))
                     {
                         action.Status = ActionStatus.Aborted;
                         return;
@@ -29,7 +29,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Func<Action, bool> replacePredicate = a => a.Interruptable &&
                                                     a.ActionType == ActionType.Move &&
                                                     a.Formation == action.Formation &&
-                                                    a.Status == ActionStatus.Pending;
+                                                           (a.Status == ActionStatus.Pending ||
+                                                            a.Status == ActionStatus.Executing);
                 var oldSequence = _internalQueue.LastOrDefault(s => s.Any(replacePredicate));
                 var actionToReplace = oldSequence?.LastOrDefault(replacePredicate);
                 actionToReplace?.Abort();

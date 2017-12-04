@@ -64,7 +64,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public override string ToString()
         {
-            return $"({Left}; {Top}) ({Right}; {Bottom}); Center ({Center.X}; {Center.Y})";
+            return $"({Left:000.0}; {Top:000.0}) ({Right:000.0}; {Bottom:000.0}); Center ({Center.X:000.0}; {Center.Y:000.0})";
         }
     }
 }

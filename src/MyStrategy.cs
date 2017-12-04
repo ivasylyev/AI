@@ -68,9 +68,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void AttackOrDefenceOrOccupy()
         {
-            if (Global.World.TickIndex % 120 == 0 &&
-                Global.EnemyFormations.Count > 0 &&
-                Global.World.TickIndex % 60 == 0)
+            if (Global.World.TickIndex % 60 == 0 &&
+                Global.EnemyFormations.Count > 0 )
             {
                 foreach (var formation in Global.MyFormations.Values.Where(f => f.Alive && f.Vehicles.Any()))
                 {
@@ -113,7 +112,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         }
                         if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
                         {
-                            var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
+                            var actionMove = formation.MoveCenterTo(Global.MyArrvs.Center);
                             var sequence = new ActionSequence(actionMove);
                             Global.ActionQueue.Add(sequence);
                             continue;

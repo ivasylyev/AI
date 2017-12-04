@@ -488,17 +488,19 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var move1 = f1.ShiftTo(delta.X, delta.Y);
             move1.Interruptable = false;
             move1.IsAnticollision = true;
-            if (f1.Density < densistyLimit)
+            if (f1.Density < densistyLimit && f1.Alive && f1.Count >0)
             {
                 var scale1 = f1.ScalePoint(f1.MassCenter, 0.1);
                 scale1.Interruptable = false;
                 scale1.IsAnticollision = true;
-                scale1.AbortAtWorldTick = Global.World.TickIndex + 10;
+                scale1.AbortAtWorldTick = Global.World.TickIndex + (int)(Math.Sqrt(f1.Rect.SqrDiameter)/(4* f1.MaxSpeed));
 
                 var rotate = f1.RotateCenter(Math.PI / 2);
                 rotate.Interruptable = false;
                 rotate.StartCondition = () => Global.World.TickIndex >= scale1.AbortAtWorldTick;
+                rotate.AbortAtWorldTick = scale1.AbortAtWorldTick + 10;
 
+                move1.StartCondition = () => Global.World.TickIndex >= rotate.AbortAtWorldTick;
                 PauseExecuteAndContinue(f1, scale1, rotate, move1);
             }
             else

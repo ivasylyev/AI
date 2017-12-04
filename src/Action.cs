@@ -101,7 +101,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public override string ToString()
         {
             return
-                $"Tick:{Global.World.TickIndex},{ActionType},{Formation?.Type}, Rect:({GetLeft():###.#};{GetTop():###.#}  {GetRight():###.#};{GetBottom():###.#}), X;Y:({GetX():###.#};{GetY():###.#}), Group:{Group} Status:{Status}";
+                $"Tick:{Global.World.TickIndex},{ActionType},{Formation?.Type}, Rect:({GetLeft():000.0};{GetTop():000.0}  {GetRight():000.0};{GetBottom():000.0}), X;Y:({GetX():000.0};{GetY():000.0}), Group:{Group} Status:{Status}";
         }
     }
 }
