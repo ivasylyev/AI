@@ -12,7 +12,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public void Add(ActionSequence sequence)
         {
             var moveActions = sequence.Where(a => a.ActionType == ActionType.Move && a.Formation != null).ToList();
-            if (moveActions.Count == 1)
+            if (moveActions.Count > 0)
             {
                 var action = moveActions.First();
                 if (action.IsAnticollision)
@@ -20,20 +20,26 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     if (_internalQueue.Any(s => s.Any(a => a.IsAnticollision &&
                                                            a.Formation == action.Formation &&
                                                            (a.Status == ActionStatus.Pending ||
-                                                           a.Status == ActionStatus.Executing))))
+                                                            a.Status == ActionStatus.Executing))))
                     {
-                        action.Status = ActionStatus.Aborted;
                         return;
                     }
                 }
-                Func<Action, bool> replacePredicate = a => a.Interruptable &&
-                                                    a.ActionType == ActionType.Move &&
-                                                    a.Formation == action.Formation &&
-                                                           (a.Status == ActionStatus.Pending ||
-                                                            a.Status == ActionStatus.Executing);
-                var oldSequence = _internalQueue.LastOrDefault(s => s.Any(replacePredicate));
-                var actionToReplace = oldSequence?.LastOrDefault(replacePredicate);
-                actionToReplace?.Abort();
+                foreach (var seq in _internalQueue)
+                {
+                    foreach (var act in seq)
+                    {
+                        if (act.Formation == action.Formation &&
+                            act.Interruptable &&
+                            (act.Status == ActionStatus.Pending || act.Status == ActionStatus.Executing) &&
+                            (act.ActionType == ActionType.Move || act.ActionType == ActionType.Scale ||
+                             act.ActionType == ActionType.Rotate)
+                        )
+                        {
+                            act.Abort();
+                        }
+                    }
+                }
             }
             _internalQueue.Add(sequence);
 
@@ -52,6 +58,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.ActionType == type));
         }
+
         public bool HasActionsFor(MyFormation formation)
         {
             return _internalQueue.Any(sequence => sequence.Any(a => a.Formation == formation));
