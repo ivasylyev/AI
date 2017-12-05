@@ -254,21 +254,26 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             var enemyFightersCount = Global.EnemyFighters.Count();
             if (formation == Global.MyHelicopters && enemyFightersCount > 30)
             {
-                MyFormation foundAllyGround = null;
-                if (Global.MyIfvs.Alive && Global.MyIfvs.Vehicles.Count > 30)
+                var enemyFighters = FormationFactory.CreateEnemyFormation(Global.EnemyFighters);
+                if ((enemyFighters.Rect.RightBottom - enemyFighters.Rect.LeftTop).Length() < 300)
                 {
-                    foundAllyGround = Global.MyIfvs;
-                }
-                else if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
-                {
-                    foundAllyGround = Global.MyArrvs;
-                }
-                if (foundAllyGround != null)
-                {
-                    var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
-                    var sequence = new ActionSequence(actionMove);
-                    Global.ActionQueue.Add(sequence);
-                    return true;
+                    MyFormation foundAllyGround = null;
+                    if (Global.MyIfvs.Alive && Global.MyIfvs.Vehicles.Count > 30)
+                    {
+                        foundAllyGround = Global.MyIfvs;
+                    }
+                    else if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
+                    {
+                        foundAllyGround = Global.MyArrvs;
+                    }
+                    if (foundAllyGround != null)
+                    {
+                        var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
+                        //PauseExecuteAndContinue(formation)
+                        var sequence = new ActionSequence(actionMove);
+                        Global.ActionQueue.Add(sequence);
+                        return true;
+                    }
                 }
             }
             if (formation == Global.MyFighters)
@@ -276,14 +281,20 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 if (enemyFightersCount > 10)
                 {
                     var enemy = FormationFactory.CreateEnemyFormation(Global.EnemyFighters);
-                    MakeAttackOrder(formation, enemy, true);
-                    return true;
+                    if ((enemy.Rect.RightBottom - enemy.Rect.LeftTop).Length() < 200)
+                    {
+                        MakeAttackOrder(formation, enemy, false);
+                        return true;
+                    }
                 }
                 if (Global.EnemyHelicopters.Count() > 10)
                 {
                     var enemy = FormationFactory.CreateEnemyFormation(Global.EnemyHelicopters);
-                    MakeAttackOrder(formation, enemy, false);
-                    return true;
+                    if ((enemy.Rect.RightBottom - enemy.Rect.LeftTop).Length() < 300)
+                    {
+                        MakeAttackOrder(formation, enemy, false);
+                        return true;
+                    }
                 }
                 if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
                 {
@@ -294,33 +305,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 }
             }
 
-            var oneUnitDanger = new Dictionary<EnemyFormation, double>();
-            var wholeDanger = new Dictionary<EnemyFormation, double>();
+            var oneShotDanger = new Dictionary<EnemyFormation, double>();
+
             foreach (var enemy in Global.EnemyFormations)
             {
                 var dangerForEnemy = formation.DangerFor(enemy);
                 var dangerForMe = enemy.DangerFor(formation);
-                oneUnitDanger.Add(enemy, dangerForEnemy - dangerForMe);
-
-                wholeDanger.Add(enemy, dangerForEnemy * formation.Count - dangerForMe * enemy.Count);
+                oneShotDanger.Add(enemy, dangerForEnemy - dangerForMe);
             }
 
             // todo: давать правильную команду 
             // выбирать также по расстоянию
             EnemyFormation target = null;
-            var targetPair = wholeDanger.OrderByDescending(kv => kv.Value).First();
+            var targetPair = oneShotDanger.OrderByDescending(kv => kv.Value).First();
             if (targetPair.Value > 0)
             {
                 target = targetPair.Key;
             }
-            if (target == null)
-            {
-                targetPair = oneUnitDanger.OrderByDescending(kv => kv.Value).First();
-                if (targetPair.Value > 0)
-                {
-                    target = targetPair.Key;
-                }
-            }
+
             if (target != null)
             {
                 MakeAttackOrder(formation, target, false);
@@ -597,13 +599,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static double DangerFor(this Formation source, Formation dest)
         {
             var destAeralPercent = dest.AeralPercent;
-            var oneUnitAeralAttack = destAeralPercent * (source.AvgAerialDamage - dest.AvgAerialDefence);
-            var oneUnitGroundAttack = (1 - destAeralPercent) * (source.AvgGroundDamage - dest.AvgGroundDefence);
+            var oneUnitAeralAttack = Math.Max(0, destAeralPercent * (source.AvgAerialDamage - dest.AvgAerialDefence));
+            var oneUnitGroundAttack =
+                Math.Max(0, (1 - destAeralPercent) * (source.AvgGroundDamage - dest.AvgGroundDefence));
             var oneUnitAttack = oneUnitGroundAttack + oneUnitAeralAttack;
-            //            var totalAttack = source.Count * oneUnitAttack;
+            var totalAttack = Math.Min(source.Count * oneUnitAttack, dest.Durability);
             //            var danger = totalAttack / (dest.Durability + 1);
-            var danger = Math.Max(0, oneUnitAttack / (dest.Durability + 1));
-            return danger;
+            // var danger = Math.Max(0, oneUnitAttack / (dest.Durability + 1));
+            return totalAttack;
         }
 
         public static void FinalSpread()
