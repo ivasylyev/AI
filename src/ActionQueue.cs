@@ -25,27 +25,32 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         return;
                     }
                 }
-                foreach (var seq in _internalQueue)
-                {
-                    foreach (var act in seq)
-                    {
-                        if (act.Formation == action.Formation &&
-                            act.Interruptable &&
-                            (act.Status == ActionStatus.Pending || act.Status == ActionStatus.Executing) &&
-                            (act.ActionType == ActionType.Move || act.ActionType == ActionType.Scale ||
-                             act.ActionType == ActionType.Rotate)
-                        )
-                        {
-                            act.Abort();
-                        }
-                    }
-                }
+                AbortOldActionsFor(action.Formation);
             }
             _internalQueue.Add(sequence);
 
             foreach (var action in sequence)
             {
                 action.Status = ActionStatus.Pending;
+            }
+        }
+
+        public void AbortOldActionsFor(Formation formation)
+        {
+            foreach (var seq in _internalQueue)
+            {
+                foreach (var act in seq)
+                {
+                    if (act.Formation == formation &&
+                        act.Interruptable &&
+                        (act.Status == ActionStatus.Pending || act.Status == ActionStatus.Executing) &&
+                        (act.ActionType == ActionType.Move || act.ActionType == ActionType.Scale ||
+                         act.ActionType == ActionType.Rotate)
+                    )
+                    {
+                        act.Abort();
+                    }
+                }
             }
         }
 

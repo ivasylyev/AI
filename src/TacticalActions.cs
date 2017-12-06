@@ -227,9 +227,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
-        public static bool OccupyFacilities(MyFormation formation)
+        public static bool OccupyFacilities(MyFormation formation, bool breakCurrentAction)
         {
-            if (formation.Alive && !formation.Busy && formation.AeralPercent < 0.1)
+            if (formation.Alive && 
+                (!formation.Busy || breakCurrentAction)&& 
+                formation.AeralPercent < 0.1)
             {
                 var freeFacility = Global.World.Facilities
                     .OrderBy(f => f.Center.SqrDistance(formation.Center))
@@ -250,6 +252,57 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
 
         public static bool Attack(MyFormation formation)
+        {
+            if (AirAttack(formation))
+                return true;
+
+            var targetFacility = Global.World.Facilities
+                .Where(f => f.SelectedAsTargetForGroup == formation.GroupIndex).OrderBy(f=>f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+
+            if (targetFacility == null)
+            {
+                OccupyFacilities(formation, true);
+                targetFacility = Global.World.Facilities
+                    .Where(f => f.SelectedAsTargetForGroup == formation.GroupIndex).OrderBy(f => f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+            }
+
+            double maxAttackDistance = (targetFacility == null)
+                ? Global.World.Width / 2
+                :Math.Min(100, formation.Center.Distance(targetFacility.Center)/2);
+
+            var oneShotDanger = new Dictionary<EnemyFormation, double>();
+            foreach (var enemy in Global.EnemyFormations)
+            {
+                var dangerForEnemy = formation.DangerFor(enemy);
+                var dangerForMe = enemy.DangerFor(formation);
+                if (enemy.Center.Distance(formation.Center) < maxAttackDistance)
+                {
+                    oneShotDanger.Add(enemy, dangerForEnemy - dangerForMe);
+                }
+            }
+
+            EnemyFormation target = null;
+            if (oneShotDanger.Count > 0)
+            {
+                var targetPair = oneShotDanger
+                    .OrderByDescending(kv => kv.Value)
+                    .FirstOrDefault();
+
+                if (targetPair.Value > 0)
+                {
+                    target = targetPair.Key;
+                }
+            }
+
+            if (target != null)
+            {
+                MakeAttackOrder(formation, target, false);
+                return true;
+            }
+            return false;
+        }
+
+        private static bool AirAttack(MyFormation formation)
         {
             var enemyFightersCount = Global.EnemyFighters.Count();
             if (formation == Global.MyHelicopters && enemyFightersCount > 30)
@@ -296,47 +349,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         return true;
                     }
                 }
-//                if (Global.MyArrvs.Alive && Global.MyArrvs.Vehicles.Count > 30)
-//                {
-//                    var actionMove = formation.MoveCenterTo(Global.MyArrvs.Center);
-//                    AbortAndAddToExecutingSequence(formation, actionMove);
-//                    return true;
-//                }
-            }
-
-            var oneShotDanger = new Dictionary<EnemyFormation, double>();
-
-            foreach (var enemy in Global.EnemyFormations)
-            {
-                var dangerForEnemy = formation.DangerFor(enemy);
-                var dangerForMe = enemy.DangerFor(formation);
-                oneShotDanger.Add(enemy, dangerForEnemy - dangerForMe);
-            }
-
-            // todo: давать правильную команду 
-            // выбирать также по расстоянию
-            EnemyFormation target = null;
-            var targetPair = oneShotDanger.OrderByDescending(kv => kv.Value).First();
-            if (targetPair.Value > 0)
-            {
-                target = targetPair.Key;
-            }
-
-            if (target != null)
-            {
-                var targetFacility = Global.World.Facilities
-                    .Where(f => f.SelectedAsTargetForGroup == formation.GroupIndex).ToList();
-                if (targetFacility.Any())
-                {
-                    foreach (var facility in targetFacility)
-                    {
-                        facility.SelectedAsTargetForGroup = null;
-                    }
-                    OccupyFacilities(formation);
-                    return true;
-                }
-                MakeAttackOrder(formation, target, false);
-                return true;
             }
             return false;
         }
@@ -517,14 +529,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     executingAction.Interruptable)
                 {
                     action.First().StartCondition = () => true;
-                    formation.ExecutingSequence.AddRange(action);
-
                     var continueAction = executingAction.Clone();
                     continueAction.StartCondition = () =>
                         action.Last().Status == ActionStatus.Finished ||
                         action.Last().Status == ActionStatus.Aborted;
+
+                    Global.ActionQueue.AbortOldActionsFor(formation);
+                    formation.ExecutingSequence.AddRange(action);
                     formation.ExecutingSequence.Add(continueAction);
-                    executingAction.Abort();
                 }
                 if (executingAction == null)
                 {
@@ -545,8 +557,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     executingAction.Interruptable)
                 {
                     action.First().StartCondition = () => true;
+                    Global.ActionQueue.AbortOldActionsFor(formation);
                     formation.ExecutingSequence.AddRange(action);
-                    executingAction.Abort();
                 }
                 if (executingAction == null)
                 {

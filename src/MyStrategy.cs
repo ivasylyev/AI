@@ -103,7 +103,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 foreach (var formation in Global.MyFormations.Values.Where(f => f.Alive && f.Vehicles.Any()))
                 {
-                    if (TacticalActions.OccupyFacilities(formation))
+                    if (TacticalActions.OccupyFacilities(formation, false))
                     {
                         continue;
                     }
