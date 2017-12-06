@@ -25,6 +25,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
 
         public static IEnumerable<Facility> MyFacilities => World?.Facilities.Where(f => f.IsMine);
+        public static IEnumerable<Facility> NotMyFacilities => World?.Facilities.Where(f => !f.IsMine);
 
         public static MyFormation MyFighters => MyFormations[1 + (int) VehicleType.Fighter];
         public static MyFormation MyHelicopters => MyFormations[1 + (int) VehicleType.Helicopter];

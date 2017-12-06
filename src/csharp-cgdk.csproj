@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Action.cs" />
+    <Compile Include="ActionPriority.cs" />
     <Compile Include="ActionQueue.cs" />
     <Compile Include="ActionSequence.cs" />
     <Compile Include="ActionStatus.cs" />

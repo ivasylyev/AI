@@ -104,7 +104,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
             if (_internalQueue.Any() && Global.Me.RemainingActionCooldownTicks == 0)
             {
-                var sequence = _internalQueue.FirstOrDefault(s => s.Urgent && s.ReadyToStart) ??
+                var sequence = _internalQueue.FirstOrDefault(s => s.IsUrgent && s.ReadyToStart) ??
+                               _internalQueue.FirstOrDefault(s => s.IsHigh && s.ReadyToStart) ??
                                _internalQueue.FirstOrDefault(s => s.ReadyToStart);
                 if (sequence != null)
                 {
@@ -121,7 +122,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 if (Global.SelectedFormation != action.Formation)
                 {
-                    action.Urgent = true;
+                    action.Priority = ActionPriority.High;
                     action = action.Formation.GetSelectionAction();
                 }
                 else

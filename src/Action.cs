@@ -23,7 +23,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public long FacilityId { get; set; } = -1L;
         public long VehicleId { get; set; } = -1L;
 
-        public bool Urgent { get; set; }
+        public ActionPriority Priority { get; set; }
         public bool Interruptable { get; set; } = true;
         public bool IsAnticollision { get; set; }
         
@@ -54,12 +54,14 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public Action(int minimumDuration = DefaultMinimalDuration)
         {
             MinimumDuration = minimumDuration;
+            Priority = ActionPriority.Normal;
         }
 
         public Action(MyFormation formation, int minimumDuration = DefaultMinimalDuration)
         {
             Formation = formation;
             MinimumDuration = minimumDuration;
+            Priority = ActionPriority.Normal;
             if (Formation != null)
             {
                 FinishCondition = () => !Formation.Busy;
@@ -80,7 +82,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 VehicleType = VehicleType,
                 VehicleId = VehicleId,
                 FacilityId = FacilityId,
-                Urgent = Urgent,
+                Priority = Priority,
                 Status = ActionStatus.Pending,
                 GetX = GetX,
                 GetY = GetY,

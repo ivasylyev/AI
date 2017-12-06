@@ -10,7 +10,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             AddRange(action);
         }
 
-        public bool Urgent
+        public bool IsUrgent
         {
             get
             {
@@ -20,7 +20,21 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     return false;
                 }
-                return pendingAction.Urgent;
+                return pendingAction.Priority == ActionPriority.Urgent;
+            }
+        }
+
+        public bool IsHigh
+        {
+            get
+            {
+                var pendingAction = GetPendingAction();
+                var executingAction = GetExecutingAction();
+                if (pendingAction == null || executingAction != null)
+                {
+                    return false;
+                }
+                return pendingAction.Priority == ActionPriority.High;
             }
         }
 

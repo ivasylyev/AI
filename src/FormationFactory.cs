@@ -123,7 +123,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 ActionType = ActionType.Assign,
                 Group = groupIndex,
-           //     Urgent = true
+           //     IsUrgent = true
             };
             assignAction.Callback = () =>
             {

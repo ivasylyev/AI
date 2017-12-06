@@ -33,6 +33,18 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
+        public double MinSpeed
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Min(v => v.MaxSpeed);
+            }
+        }
+
         public double Density
         {
             get
@@ -64,11 +76,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             get
             {
-                if (Vehicles.Count == 0)
+                if (Vehicles.Values.Any(v => v.AerialDamage > 0))
                 {
-                    return 0;
+                    return Vehicles.Values.Where(v => v.AerialDamage > 0).Average(v => v.AerialDamage);
                 }
-                return Vehicles.Values.Average(v => v.AerialDamage);
+                return 0;
             }
         }
 
@@ -88,11 +100,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             get
             {
-                if (Vehicles.Count == 0)
+                if (Vehicles.Values.Any(v => v.GroundDamage > 0))
                 {
-                    return 0;
+                    return Vehicles.Values.Where(v => v.GroundDamage > 0).Average(v => v.GroundDamage);
                 }
-                return Vehicles.Values.Average(v => v.GroundDamage);
+                return 0;
             }
         }
 

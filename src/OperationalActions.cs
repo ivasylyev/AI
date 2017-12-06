@@ -13,7 +13,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 GetX = () => target.X + 30 * target.SpeedX,
                 GetY = () => target.Y + 30 * target.SpeedY,
                 VehicleId = visitor.Id,
-                Urgent = true,
+                Priority = ActionPriority.Urgent
             };
             return action;
         }
@@ -24,7 +24,20 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 ActionType = ActionType.SetupVehicleProduction,
                 FacilityId = facility.Id,
-                VehicleType = type
+                VehicleType = type,
+                Priority = ActionPriority.High
+            };
+            return action;
+        }
+
+        public static Action StopProduction(this Facility facility)
+        {
+            var action = new Action
+            {
+                ActionType = ActionType.SetupVehicleProduction,
+                FacilityId = facility.Id,
+                VehicleType = null,
+                Priority = ActionPriority.High
             };
             return action;
         }

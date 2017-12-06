@@ -38,7 +38,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         private void Anticollision()
         {
-            if (Global.World.TickIndex > 120 && Global.World.TickIndex % 20 == 0)
+            if (Global.World.TickIndex > 120 && Global.World.TickIndex % 30 == 0)
             {
                 TacticalActions.Anticollision();
             }
@@ -50,47 +50,20 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (Global.World.TickIndex % 10 == 0)
             {
-                var myFightersCount = Global.MyFighters.Vehicles.Count;
-                var myHelisCount = Global.MyHelicopters.Vehicles.Count;
-
-                var enemyFightersCount = Global.EnemyFighters.Count();
-                var enemyHeliCount = Global.EnemyHelicopters.Count();
-
-
-                if (myFightersCount < enemyFightersCount + enemyHeliCount)
+                foreach (var facility in Global.NotMyFacilities)
                 {
-                    neededType = VehicleType.Fighter;
+                    facility.InitialTickIndex = Global.World.TickIndex;
                 }
-                else if (myHelisCount < enemyHeliCount)
-                {
-                    neededType = VehicleType.Helicopter;
-                }
-                else
-                {
-                    if (Global.World.TickIndex % 1800 == 0)
-                    {
-                        neededType = VehicleType.Tank;
-                    }
-                    if (Global.World.TickIndex % 1800 == 600)
-                    {
-                        neededType = VehicleType.Arrv;
-                    }
-                    if (Global.World.TickIndex % 1800 == 1200)
-                    {
-                        neededType = VehicleType.Ifv;
-                    }
-                }
-
                 foreach (var facility in Global.MyFacilities)
                 {
-                    TacticalActions.SetupProductionIfNeed(facility, neededType);
+                    TacticalActions.SetupProductionIfNeed(facility);
                 }
             }
         }
 
         private void AssignNewGroups()
         {
-            if (Global.World.TickIndex % 120 == 0)
+            if (Global.World.TickIndex % 30 == 0)
             {
                 TacticalActions.CreateProducedFormation();
             }
@@ -103,6 +76,15 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 foreach (var formation in Global.MyFormations.Values.Where(f => f.Alive && f.Vehicles.Any()))
                 {
+                    if (Global.World.TickIndex % 300 == 0)
+                    {
+                        foreach (var facility in Global.World.Facilities)
+                        {
+                            
+                                facility.SelectedAsTargetForGroup = null;
+                            
+                        }
+                    }
                     if (TacticalActions.OccupyFacilities(formation, false))
                     {
                         continue;
