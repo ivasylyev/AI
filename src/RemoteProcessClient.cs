@@ -672,7 +672,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk {
 
         private void WriteByteArray(byte[] array) {
             if (array == null) {
-                WriteInt(-1);
+                WriteInt(-1); 
             } else {
                 WriteInt(array.Length);
                 WriteBytes(array);
