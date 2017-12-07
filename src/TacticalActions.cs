@@ -191,7 +191,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 {
                     List<VehicleWrapper> createdVehicles = facility.CreatedVehicles;
 
-                    if (createdVehicles.Count > 40 || facility.NearGroundEnemyCount > 10 && createdVehicles.Count > 20 )
+                    if (createdVehicles.Count > 40 || facility.NearGroundEnemyCount > 10 && createdVehicles.Count > 20)
                     {
                         Rect createdRect = facility.CreatedVehiclesRect;
                         var allVehiclesInsideCount = Global.MyVehicles.Values.Count(v => v.IsInside(createdRect));
@@ -201,7 +201,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                             var result = FormationFactory.CreateMyFormation(createdRect.Left, createdRect.Top,
                                 createdRect.Right, createdRect.Bottom);
                             result.ActionList.Insert(0, stopProduction);
-                       
+
                             foreach (var action in result.ActionList)
                             {
                                 action.Priority = ActionPriority.High;
@@ -230,15 +230,16 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                                       facility.VehicleType == VehicleType.Ifv ||
                                       facility.VehicleType == VehicleType.Arrv);
 
-            if (myFightersCount < 0.8 * enemyFightersCount)
-            {
-                neededType = VehicleType.Fighter;
-                if (isGroundProducing)
-                {
-                    CreateProducedFormation();
-                }
-            }
-            else if (myHelisCount < 0.8 * enemyHeliCount)
+//            if (myFightersCount < 0.8 * enemyFightersCount)
+//            {
+//                neededType = VehicleType.Fighter;
+//                if (isGroundProducing)
+//                {
+//                    CreateProducedFormation();
+//                }
+//            }
+//            else 
+            if (myHelisCount < 0.8 * enemyHeliCount && enemyFightersCount < 30)
             {
                 neededType = VehicleType.Helicopter;
                 if (isGroundProducing)
@@ -257,9 +258,9 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 }
                 facility.InitialTickIndex++;
                 var tick = (Global.World.TickIndex - facility.InitialTickIndex) % 1200;
-                
-                neededType = tick < 1200 - 6*Math.Min(150, enemyHeliCount) 
-                    ? VehicleType.Tank 
+
+                neededType = tick < 1200 - 6 * Math.Min(150, enemyHeliCount)
+                    ? VehicleType.Tank
                     : VehicleType.Ifv;
             }
 
@@ -282,13 +283,28 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 (!formation.Busy || breakCurrentAction) &&
                 formation.AeralPercent < 0.1)
             {
-                var freeFacility = Global.World.Facilities
-                    .OrderBy(f => f.Center.SqrDistance(formation.Center))
-                    .FirstOrDefault(f => !f.IsMine && !f.SelectedAsTargetForGroup.HasValue);
+                var targetFacility = formation.FacilityAsTarget == null
+                    ? null
+                    : Global.World.Facilities.FirstOrDefault(f => f.Id == formation.FacilityAsTarget.Value);
 
+                Facility freeFacility = null;
+                if (targetFacility != null && !targetFacility.IsMine)
+                {
+                    freeFacility = targetFacility;
+                }
+                else
+                {
+                    var planningToOccupy = Global.MyFormations.Values
+                        .Where(f => f.FacilityAsTarget.HasValue)
+                        .Select(f => f.FacilityAsTarget.Value).ToList();
+
+                    freeFacility = Global.NotMyFacilities
+                        .Where(f => !f.IsMine && !planningToOccupy.Contains(f.Id))
+                        .OrderBy(f => f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+                }
                 if (freeFacility != null)
                 {
-                    freeFacility.SelectedAsTargetForGroup = formation.GroupIndex;
+                    formation.FacilityAsTarget = freeFacility.Id;
 
                     var actionMove = formation.MoveCenterTo(freeFacility.Center);
                     var sequence = new ActionSequence(actionMove);
@@ -305,16 +321,25 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             if (AirAttack(formation))
                 return true;
 
-            var targetFacility = Global.World.Facilities
-                .Where(f => f.SelectedAsTargetForGroup == formation.GroupIndex)
-                .OrderBy(f => f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+            var targetFacility = formation.FacilityAsTarget == null
+                ? null
+                : Global.World.Facilities.FirstOrDefault(f => f.Id == formation.FacilityAsTarget.Value);
 
-            if (targetFacility == null)
+            if (formation.FacilityAsTarget == null)
             {
                 OccupyFacilities(formation, true);
-                targetFacility = Global.World.Facilities
-                    .Where(f => f.SelectedAsTargetForGroup == formation.GroupIndex)
-                    .OrderBy(f => f.Center.SqrDistance(formation.Center)).FirstOrDefault();
+
+                targetFacility = formation.FacilityAsTarget == null
+                    ? null
+                    : Global.World.Facilities.FirstOrDefault(f => f.Id == formation.FacilityAsTarget.Value);
+            }
+            if (targetFacility != null)
+            {
+                if (targetFacility.IsMine)
+                {
+                    targetFacility = null;
+                    formation.FacilityAsTarget = null;
+                }
             }
 
             double maxAttackDistance = (targetFacility == null)
@@ -355,11 +380,24 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 MakeAttackOrder(formation, target, false);
                 return true;
             }
+            if (targetFacility != null)
+            {
+                var actionMove = formation.MoveCenterTo(targetFacility.Center);
+                var sequence = new ActionSequence(actionMove);
+                Global.ActionQueue.Add(sequence);
+            }
             return false;
         }
 
         private static bool AirAttack(MyFormation formation)
         {
+            if (formation != Global.MyHelicopters && formation != Global.MyFighters)
+                return false;
+            if (formation.Durability / (formation.MaxDurability + 1) < 0.6)
+            {
+                if (MoveToAlly(formation, Global.MyArrvs))
+                    return true;
+            }
             var enemyFightersCount = Global.EnemyFighters.Count();
             if (formation == Global.MyHelicopters && enemyFightersCount > 30)
             {
@@ -377,7 +415,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     }
                     if (foundAllyGround != null)
                     {
-                        var actionMove = formation.MoveCenterTo(Global.MyIfvs.Center);
+                        var actionMove = formation.MoveCenterTo(foundAllyGround.Center);
                         AbortAndAddToExecutingSequence(formation, actionMove);
                         return true;
                     }
@@ -391,8 +429,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     var enemyLength = (enemy.Rect.RightBottom - enemy.Rect.LeftTop).Length();
                     if (enemyLength < 200)
                     {
-                        MakeAttackOrder(formation, enemy, true);
-                        return true;
+                        if (AttackOrRunAway(formation, enemy))
+                            return true;
                     }
                 }
                 if (Global.EnemyHelicopters.Count() > 10)
@@ -401,10 +439,45 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                     var enemyLength = (enemy.Rect.RightBottom - enemy.Rect.LeftTop).Length();
                     if (enemyLength < 300)
                     {
+                        if (AttackOrRunAway(formation, enemy))
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static bool AttackOrRunAway(MyFormation formation, EnemyFormation enemy)
+        {
+            foreach (var enemyFormation in Global.EnemyFormations)
+            {
+                if (enemyFormation.Rect.IsInside(enemy.Center))
+                {
+                    var dangerForEnemy = formation.DangerFor(enemy);
+                    var dangerForMe = enemy.DangerFor(formation);
+                    if (dangerForMe < dangerForEnemy * 1.5)
+                    {
                         MakeAttackOrder(formation, enemy, true);
                         return true;
                     }
+                    if (MoveToAlly(formation, Global.MyArrvs))
+                        return true;
+                    if (MoveToAlly(formation, Global.MyIfvs))
+                        return true;
+                    if (MoveToAlly(formation, Global.MyTanks))
+                        return true;
                 }
+            }
+            return false;
+        }
+
+        private static bool MoveToAlly(MyFormation formation, MyFormation allyFormation)
+        {
+            if (allyFormation.Alive && allyFormation.Vehicles.Count > 10)
+            {
+                var actionMove = formation.MoveCenterTo(allyFormation.Center);
+                AbortAndAddToExecutingSequence(formation, actionMove);
+                return true;
             }
             return false;
         }
@@ -432,7 +505,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 var enemyDirection = enemy.AvgSpeed.Normalized();
 
                 var resultDirection =
-                    (myDirection + enemySpeedScalar / mySpeedScalar * enemyDirection);
+                    (myDirection + enemySpeedScalar / mySpeedScalar * enemyDirection).Normalized();
 
                 pointToMove = myMassCenter + distance * resultDirection;
             }
@@ -450,8 +523,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 var newVector = pointToMove - me.Center;
 
                 var scalar = oldVector.Normalized() * newVector.Normalized();
-                if (scalar > 0.95 || // около 18 градусов
-                    (oldVector - newVector).Length() < 20)
+                if (me.Busy && (scalar > 0.95 || // около 18 градусов
+                                (oldVector - newVector).Length() < 20))
                 {
                     return false;
                 }
@@ -468,14 +541,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 AbortAndAddToExecutingSequence(me, actionMove);
             }
-
-            foreach (var facility in Global.World.Facilities)
-            {
-                if (facility.SelectedAsTargetForGroup == me.GroupIndex)
-                {
-                    facility.SelectedAsTargetForGroup = null;
-                }
-            }
+            me.FacilityAsTarget = null;
             return true;
         }
 
@@ -598,6 +664,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 }
                 if (executingAction == null)
                 {
+                    action.First().StartCondition = () => true;
                     var newSequence = new ActionSequence(action);
                     Global.ActionQueue.Add(newSequence);
                 }
@@ -628,6 +695,17 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
         public static void Anticollision()
         {
+            if (Global.JoinFormation1 != null && Global.JoinFormation1.Alive && Global.JoinFormation1.Count > 0 &&
+                Global.JoinFormation2 != null && Global.JoinFormation2.Alive && Global.JoinFormation2.Count > 0)
+            {
+                var result = FormationFactory.CreateMyFormation(Global.JoinFormation1, Global.JoinFormation2);
+
+                Global.JoinFormation1 = null;
+                Global.JoinFormation2 = null;
+
+                Global.ActionQueue.Add(new ActionSequence(result.ActionList.ToArray()));
+                return;
+            }
             var processedKeys = new List<int>();
             foreach (var key1 in Global.MyFormations.Keys)
             {
@@ -669,18 +747,33 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                             {
                                 var delta = f1.Center - f2.Center;
 
-                                if (!processedKeys.Contains(key1))
+                                if (Global.MyFormations.Count > 15 &&
+                                    f1.Count < 50 &&
+                                    f2.Count < 50 &&
+                                    !processedKeys.Contains(key1) &&
+                                    !processedKeys.Contains(key2))
                                 {
                                     processedKeys.Add(key1);
-                                    var delta1 = 20 * (delta.Normalized() + f1.AvgSpeed.Normalized());
-
-                                    CompactAndContinue(f1, delta1);
-                                }
-                                if (!processedKeys.Contains(key2))
-                                {
                                     processedKeys.Add(key2);
-                                    var delta2 = 20 * (delta.Normalized() + f2.AvgSpeed.Normalized());
-                                    CompactAndContinue(f2, -1 * delta2);
+                                    Global.JoinFormation1 = f1;
+                                    Global.JoinFormation2 = f2;
+                                    return;
+                                }
+                                else
+                                {
+                                    if (!processedKeys.Contains(key1))
+                                    {
+                                        processedKeys.Add(key1);
+                                        var delta1 = 20 * (delta.Normalized() + f1.AvgSpeed.Normalized()/2);
+
+                                        CompactAndContinue(f1, delta1);
+                                    }
+                                    if (!processedKeys.Contains(key2))
+                                    {
+                                        processedKeys.Add(key2);
+                                        var delta2 = 20 * (delta.Normalized() + f2.AvgSpeed.Normalized()/2);
+                                        CompactAndContinue(f2, -1 * delta2);
+                                    }
                                 }
                             }
                         }
@@ -727,7 +820,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 Math.Max(0, (1 - destAeralPercent) * (source.AvgGroundDamage - dest.AvgGroundDefence));
             var oneUnitAttack = oneUnitGroundAttack + oneUnitAeralAttack;
             var totalAttack = Math.Min(source.Count * oneUnitAttack, dest.Durability);
-                        var danger = totalAttack / (dest.Durability + 1);
+           // var danger = totalAttack / (dest.Durability + 1);
             // var danger = Math.Max(0, oneUnitAttack / (dest.Durability + 1));
             return totalAttack;
         }

@@ -20,9 +20,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
 
             UpdateEnemyFormations();
 
-            UpdateFacilies();
-
-
             Global.ActionQueue.Update();
         }
 
@@ -89,6 +86,35 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             foreach (var formation in Global.MyFormations.Values)
             {
                 formation.Update(Global.World.VehicleUpdates);
+            }
+            List<int> processedKeys = new List<int>();
+            List<int> keysToRemove = new List<int>();
+            foreach (var f1 in Global.MyFormations.Values)
+            {
+                foreach (var f2 in Global.MyFormations.Values)
+                {
+                    if (!processedKeys.Contains(f1.GroupIndex) && !processedKeys.Contains(f1.GroupIndex))
+                    {
+                        if (f1.Alive && f2.Alive && f1.GroupIndex != f2.GroupIndex &&
+                            (f1.Rect.Center.SqrDistance(f2.Rect.Center)) < 0.000001 &&
+                            f1.Vehicles.Count == f2.Vehicles.Count &&
+                            (f1.Durability - f2.Durability < 0.00001))
+                        {
+
+                            processedKeys.Add(f1.GroupIndex);
+                            processedKeys.Add(f2.GroupIndex);
+                            keysToRemove.Add(f2.GroupIndex);
+                        }
+                    }
+                }
+            }
+
+            foreach (var key in keysToRemove)
+            {
+                var formation = Global.MyFormations[key];
+                Global.ActionQueue.AbortOldActionsFor(formation);
+                Global.MyFormations.Remove(key);
+                
             }
         }
 
@@ -158,27 +184,6 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         }
 
 
-        private static void UpdateFacilies()
-        {
-            foreach (var facility in Global.MyFacilities)
-            {
-                var id = facility.SelectedAsTargetForGroup;
-                if (id.HasValue)
-                {
-                    if (!Global.MyFormations.ContainsKey(id.Value))
-                    {
-                        facility.SelectedAsTargetForGroup = null;
-                    }
-                    else
-                    {
-                        var myFormation = Global.MyFormations[id.Value];
-                        if (!myFormation.Alive || !myFormation.Vehicles.Any())
-                        {
-                            facility.SelectedAsTargetForGroup = null;
-                        }
-                    }
-                }
-            }
-        }
+      
     }
 }

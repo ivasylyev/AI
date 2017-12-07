@@ -26,7 +26,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public Func<bool> BusyCondition { get; set; }
         public bool Busy => BusyCondition != null && BusyCondition();
         public bool Alive { get; set; }
-
+        public long? FacilityAsTarget { get; set; }
 
         public bool IsEnemyNear()
         {
@@ -60,6 +60,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 Alive = false;
             }
+            if (!Vehicles.Any())
+            {
+                FacilityAsTarget = null;
+            }
+            
         }
 
         public override string ToString()

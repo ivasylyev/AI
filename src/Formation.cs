@@ -72,6 +72,18 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             }
         }
 
+        public double MaxDurability
+        {
+            get
+            {
+                if (Vehicles.Count == 0)
+                {
+                    return 0;
+                }
+                return Vehicles.Values.Sum(v => v.MaxDurability);
+            }
+        }
+
         public double AvgAerialDamage
         {
             get

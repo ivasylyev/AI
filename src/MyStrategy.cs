@@ -16,7 +16,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 TacticalActions.RunAwayFromNuclearStrike();
 
 
-                Anticollision();
+               
 
                 AttackOrDefenceOrOccupy();
 
@@ -24,6 +24,8 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 SetupProduction();
 
                 AssignNewGroups();
+
+                Anticollision();
 
                 TacticalActions.FinalSpread();
 
@@ -76,15 +78,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
             {
                 foreach (var formation in Global.MyFormations.Values.Where(f => f.Alive && f.Vehicles.Any()))
                 {
-                    if (Global.World.TickIndex % 300 == 0)
-                    {
-                        foreach (var facility in Global.World.Facilities)
-                        {
-                            
-                                facility.SelectedAsTargetForGroup = null;
-                            
-                        }
-                    }
+                   
                     if (TacticalActions.OccupyFacilities(formation, false))
                     {
                         continue;

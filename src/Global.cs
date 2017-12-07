@@ -15,6 +15,10 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static Game Game;
         public static Move Move;
 
+
+        public static MyFormation JoinFormation1 = null;
+        public static MyFormation JoinFormation2 = null;
+
         public static readonly Dictionary<int, MyFormation> MyFormations = new Dictionary<int, MyFormation>();
         public static readonly List<int> IgnoreCollisionGroupIndexes = new List<int>();
         public static readonly List<EnemyFormation> EnemyFormations = new List<EnemyFormation>();
@@ -27,11 +31,25 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         public static IEnumerable<Facility> MyFacilities => World?.Facilities.Where(f => f.IsMine);
         public static IEnumerable<Facility> NotMyFacilities => World?.Facilities.Where(f => !f.IsMine);
 
-        public static MyFormation MyFighters => MyFormations[1 + (int) VehicleType.Fighter];
-        public static MyFormation MyHelicopters => MyFormations[1 + (int) VehicleType.Helicopter];
-        public static MyFormation MyArrvs => MyFormations[1 + (int) VehicleType.Arrv];
-        public static MyFormation MyIfvs => MyFormations[1 + (int) VehicleType.Ifv];
-        public static MyFormation MyTanks => MyFormations[1 + (int) VehicleType.Tank];
+        public static MyFormation MyFighters => MyFormations.ContainsKey(1 + (int) VehicleType.Fighter)
+            ? MyFormations[1 + (int) VehicleType.Fighter]
+            : new MyFormation {Alive = false};
+
+        public static MyFormation MyHelicopters => MyFormations.ContainsKey(1 + (int)VehicleType.Helicopter)
+            ? MyFormations[1 + (int)VehicleType.Helicopter]
+            : new MyFormation { Alive = false };
+
+        public static MyFormation MyArrvs => MyFormations.ContainsKey(1 + (int)VehicleType.Arrv)
+            ? MyFormations[1 + (int)VehicleType.Arrv]
+            : new MyFormation { Alive = false };
+
+        public static MyFormation MyIfvs => MyFormations.ContainsKey(1 + (int)VehicleType.Ifv)
+            ? MyFormations[1 + (int)VehicleType.Ifv]
+            : new MyFormation { Alive = false };
+
+        public static MyFormation MyTanks => MyFormations.ContainsKey(1 + (int)VehicleType.Tank)
+            ? MyFormations[1 + (int)VehicleType.Tank]
+            : new MyFormation { Alive = false };
 
         public static IEnumerable<VehicleWrapper> EnemyFighters =>
             EnemyVehicles.Values.Where(v => v.Type == VehicleType.Fighter);
