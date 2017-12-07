@@ -380,6 +380,42 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 MakeAttackOrder(formation, target, false);
                 return true;
             }
+
+            var runAwayDanger = new Dictionary<EnemyFormation, double>();
+            foreach (var enemy in Global.EnemyFormations)
+            {
+                var dangerForEnemy = formation.DangerFor(enemy);
+                var dangerForMe = enemy.DangerFor(formation);
+                if (enemy.Center.Distance(formation.Center) < 150)
+                {
+                    runAwayDanger.Add(enemy,  (dangerForEnemy - dangerForMe)/(formation.Count+1.0));
+                }
+            }
+            if (runAwayDanger.Count > 0)
+            {
+                var targetPair = runAwayDanger
+                    .OrderBy(kv => kv.Value)
+                    .FirstOrDefault();
+                if (targetPair.Value < 30)
+                {
+                    var runAwayFromThis = targetPair.Key;
+                    var direction = (formation.MassCenter - runAwayFromThis.MassCenter).Normalized();
+                    formation.FacilityAsTarget = null;
+
+
+                    Global.ActionQueue.AbortOldActionsFor(formation);
+                    var actionMove = formation.ShiftTo(direction*100);
+                    actionMove.Priority = ActionPriority.High;
+                    actionMove.StartCondition = () => true;
+                    actionMove.Interruptable = false;
+                    var sequence = new ActionSequence(actionMove);
+                    Global.ActionQueue.Add(sequence);
+
+                }
+
+            }
+
+
             if (targetFacility != null)
             {
                 var actionMove = formation.MoveCenterTo(targetFacility.Center);
@@ -393,7 +429,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
         {
             if (formation != Global.MyHelicopters && formation != Global.MyFighters)
                 return false;
-            if (formation.Durability / (formation.MaxDurability + 1) < 0.6)
+            if (formation.Durability / (formation.MaxDurability + 1) < 0.7)
             {
                 if (MoveToAlly(formation, Global.MyArrvs))
                     return true;
@@ -727,9 +763,11 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                                 {
                                     processedKeys.Add(key1);
                                     var delta = f1.Center - facRect.Center;
-                                    delta = 50 * delta.Normalized();
+                                    var normalizedSpeed = f1.AvgSpeed.Normalized();
+                                    var rotated = new Point(normalizedSpeed.Y, -normalizedSpeed.X);
+                                    delta =  delta.Normalized();
 
-                                    CompactAndContinue(f1, delta);
+                                    CompactAndContinue(f1, 50*(delta + rotated/2));
                                 }
                             }
                         }
