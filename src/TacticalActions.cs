@@ -396,7 +396,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 var targetPair = runAwayDanger
                     .OrderBy(kv => kv.Value)
                     .FirstOrDefault();
-                if (targetPair.Value < 30)
+                if (targetPair.Value < -10)
                 {
                     var runAwayFromThis = targetPair.Key;
                     var direction = (formation.MassCenter - runAwayFromThis.MassCenter).Normalized();
