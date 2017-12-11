@@ -103,6 +103,7 @@
     <Compile Include="Model\World.cs" />
     <Compile Include="IStrategy.cs" />
     <Compile Include="MyOldStrategy.cs" />
+    <Compile Include="MyNewStrategy.cs" />
     <Compile Include="MyStrategy.cs" />
     <Compile Include="OperationalActions.cs" />
     <Compile Include="Point.cs" />
