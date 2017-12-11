@@ -159,7 +159,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                 _horisontalMoved = true;
                 _standingCount = 0;
             }
-            else if (_horisontalMoved && !_finalShifted && IsStandingLongTime)
+            else if (_horisontalMoved && !_finalShifted && IsStandingVeryLongTime)
             {
                 var height = (_myMaxY - _myMinY);
                 var middle = _myMinY + height / 2;

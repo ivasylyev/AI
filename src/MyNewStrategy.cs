@@ -83,7 +83,7 @@ namespace Com.CodeGame.CodeWars2017.DevKit.CSharpCgdk
                         continue;
                     }
 
-                    if (Global.EnemyFormations.Count > 0 && TacticalActions.Attack(formation))
+                    if (TacticalActions.Attack(formation))
                     {
                         continue;
                     }
